@@ -18,7 +18,6 @@ jobs:
 
             readonly unity_editor_path="/Applications/Unity/Hub/Editor/2021.3.14f1/Unity.app/Contents/MacOS/Unity"
 
-
             printf '%s\n' "export UNITY_HUB_PATH=\"$unity_hub_path\"" >> "$BASH_ENV"
 
             printf '%s\n' "export UNITY_EDITOR_PATH=$unity_editor_path" >> "$BASH_ENV"

@@ -7,9 +7,9 @@ orbs:
 
 jobs:
   run-command:
-    resource_class: large
     macos:
-      xcode: 14.1.0
+      xcode: 12.5.1
+    resource_class: large
     steps:
       - checkout
       - run:

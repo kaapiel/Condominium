@@ -58,7 +58,7 @@ jobs:
                   changeset="$(npx unity-changeset "2021.3.14f1")"
 
                   set -x
-                  "$unity_hub_path" -- --headless install --version "2021.3.14f1" --changeset "$changeset" --module ios visualstudio --childModules
+                  "$unity_hub_path" -- --headless install --version "2021.3.14f1" --changeset "$changeset" --module visualstudio --childModules
                   set +x
 
                   if [ -f "$unity_editor_path" ]; then

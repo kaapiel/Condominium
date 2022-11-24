@@ -176,14 +176,6 @@ jobs:
               -logfile /dev/stdout
             set +x
       - run:
-          name: "mkdir"
-          command: |
-            cp Assets/Resources/Scripts/Editor/CustomUnityCli.cs ./CustomUnityCli.cs
-            rm -r Assets
-            mkdir -p Assets/Scripts/Editor
-            cp ./CustomUnityCli.cs ./Assets/Scripts/Editor/CustomUnityCli.cs
-            mkdir -p Assets/StreamingAssets
-      - run:
           name: "Download skp file"
           command: |
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
@@ -197,7 +189,6 @@ jobs:
           command: |
             /Applications/Unity/Hub/Editor/2021.3.14f1/Unity.app/Contents/MacOS/Unity -projectPath . -quit -batchmode -nographics -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" -serial "$RESOLVED_UNITY_SERIAL" -stackTraceLogType 'Script Only' -executeMethod CustomUnityCli.BuildAssetBundles -logFile /dev/stdout "$FILE_NAME"
             echo ""
-            ls ./Assets/StreamingAssets
       - store_artifacts:
           path: ./Assets/StreamingAssets
 

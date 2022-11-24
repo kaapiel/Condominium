@@ -175,15 +175,14 @@ jobs:
               -serial "$resolved_unity_serial" \
               -logfile /dev/stdout
             set +x
-      #- run:
-      #    name: "mkdir"
-      #    command: |
-      #      cp Assets/Resources/Scripts/Editor/CustomUnityCli.cs ./CustomUnityCli.cs
-      #      rm -r Assets
-      #      rm -r Packages
-      #      mkdir -p Assets/Scripts/Editor
-      #      cp ./CustomUnityCli.cs ./Assets/Scripts/Editor/CustomUnityCli.cs
-      #      mkdir -p Assets/StreamingAssets
+      - run:
+          name: "mkdir"
+          command: |
+            cp Assets/Resources/Scripts/Editor/CustomUnityCli.cs ./CustomUnityCli.cs
+            rm -r Assets
+            mkdir -p Assets/Scripts/Editor
+            cp ./CustomUnityCli.cs ./Assets/Scripts/Editor/CustomUnityCli.cs
+            mkdir -p Assets/StreamingAssets
       - run:
           name: "Download skp file"
           command: |
@@ -199,8 +198,8 @@ jobs:
             /Applications/Unity/Hub/Editor/2021.3.14f1/Unity.app/Contents/MacOS/Unity -projectPath . -quit -batchmode -nographics -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" -serial "$RESOLVED_UNITY_SERIAL" -stackTraceLogType 'Script Only' -executeMethod CustomUnityCli.BuildAssetBundles -logFile /dev/stdout "$FILE_NAME"
             echo ""
             ls ./Assets/StreamingAssets
-      #- store_artifacts:
-      #    path: ./Assets/StreamingAssets
+      - store_artifacts:
+          path: ./Assets/StreamingAssets
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows

@@ -47,26 +47,6 @@ public class CustomUnityCli : MonoBehaviour
         Debug.Log("Building iOS asset bundle with BundleOptions NONE");
         BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", BuildAssetBundleOptions.None, BuildTarget.iOS);
         Debug.Log("iOS asset bundle built with BundleOption NONE");
-
-        //Build iOS asset bundles
-        Debug.Log("Building iOS asset bundle with BundleOptions UncompressedAssetBundle");
-        BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.iOS);
-        Debug.Log("iOS asset bundle built with BundleOption UncompressedAssetBundle");
-
-        //Build iOS asset bundles
-        Debug.Log("Building iOS asset bundle with BundleOptions DisableWriteTypeTree");
-        BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", BuildAssetBundleOptions.DisableWriteTypeTree, BuildTarget.iOS);
-        Debug.Log("iOS asset bundle built with BundleOption DisableWriteTypeTree");
-
-        //Build iOS asset bundles
-        Debug.Log("Building iOS asset bundle with BundleOptions ForceRebuildAssetBundle");
-        BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.iOS);
-        Debug.Log("iOS asset bundle built with BundleOption ForceRebuildAssetBundle");
-
-        //Build iOS asset bundles
-        Debug.Log("Building iOS asset bundle with BundleOptions DisableLoadAssetByFileNameWithExtension");
-        BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", BuildAssetBundleOptions.DisableLoadAssetByFileNameWithExtension, BuildTarget.iOS);
-        Debug.Log("iOS asset bundle built with BundleOption DisableLoadAssetByFileNameWithExtension");
     }
 
     // Helper function for getting the command line arguments

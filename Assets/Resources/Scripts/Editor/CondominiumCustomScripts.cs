@@ -48,7 +48,16 @@ public class CondominiumCustomScripts : MonoBehaviour
         Light lightComp = lightGameObject.AddComponent<Light>();
         lightComp.type = LightType.Directional;
         lightComp.transform.localPosition = new Vector3(0, 1000, 0);
+        lightComp.transform.localRotation = Quaternion.EulerAngles(-90, 0, 170);
         lightComp.shadows = LightShadows.Hard;
+
+        GameObject moonGameObject = new GameObject("Moon");
+        Light moonComp = moonGameObject.AddComponent<Light>();
+        moonComp.type = LightType.Directional;
+        moonComp.transform.localPosition = new Vector3(0, 1000, 0);
+        moonComp.transform.localRotation = Quaternion.EulerRotation(90, -180, 0);
+        moonComp.shadows = LightShadows.Hard;
+        moonComp.color = new Color(121f/255f, 159f/255f, 159f/255f);
 
         LightingPreset lightingPreset = ScriptableObject.CreateInstance("LightingPreset") as LightingPreset;
         lightingPreset.AmbientColor = new Gradient();
@@ -60,12 +69,17 @@ public class CondominiumCustomScripts : MonoBehaviour
             if (c.GetType() == typeof(LightingManager))
             {
 
-                FieldInfo directionalLightFieldInfo =
+                FieldInfo directionalLightSunFieldInfo =
                     c.GetType().GetField(
-                        "DirectionalLight",
+                        "DirectionalLightSun",
                         BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public
                     );
 
+                FieldInfo directionalLightMoonFieldInfo =
+                    c.GetType().GetField(
+                        "DirectionalLightMoon",
+                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public
+                    );
 
                 FieldInfo presetFieldInfo =
                     c.GetType().GetField(
@@ -73,7 +87,8 @@ public class CondominiumCustomScripts : MonoBehaviour
                         BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public
                     );
 
-                directionalLightFieldInfo.SetValue(c, lightComp);
+                directionalLightSunFieldInfo.SetValue(c, lightComp);
+                directionalLightMoonFieldInfo.SetValue(c, moonComp);
                 presetFieldInfo.SetValue(c, lightingPreset);
             }
         }

@@ -147,9 +147,19 @@ namespace SlimUI.ModernMenu{
 					  	GameObject lightGameObject = new GameObject("Sun");
 				        Light lightComp = lightGameObject.AddComponent<Light>();
 				        lightComp.type = LightType.Directional;
-				        lightComp.transform.localPosition = new Vector3(0, 1000, 0);
+						lightComp.transform.localPosition = new Vector3(0, 1000, 0);
+						lightComp.transform.localRotation = Quaternion.EulerAngles(-90, 0, 170);
 						lightComp.shadows = LightShadows.Hard;
-					  	RenderSettings.sun = lightComp;
+
+						//RenderSettings.sun = lightComp;
+
+						GameObject moonGameObject = new GameObject("Moon");
+						Light moonComp = moonGameObject.AddComponent<Light>();
+						moonComp.type = LightType.Directional;
+						moonComp.transform.localPosition = new Vector3(0, 1000, 0);
+						moonComp.transform.localRotation = Quaternion.EulerRotation(90, -180, 0);
+						moonComp.shadows = LightShadows.Hard;
+						moonComp.color = new Color(121f / 255f, 159f / 255f, 159f / 255f);
 
 						LightingPreset lightingPreset = ScriptableObject.CreateInstance("LightingPreset") as LightingPreset;
 						lightingPreset.AmbientColor = new Gradient();
@@ -178,12 +188,17 @@ namespace SlimUI.ModernMenu{
 							if (c.GetType() == typeof(LightingManager))
 							{
 
-								FieldInfo directionalLightFieldInfo =
+								FieldInfo directionalLightSunFieldInfo =
 									c.GetType().GetField(
-										"DirectionalLight",
+										"DirectionalLightSun",
 										BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public
 									);
 
+								FieldInfo directionalLightMoonFieldInfo =
+									c.GetType().GetField(
+										"DirectionalLightMoon",
+										BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public
+									);
 
 								FieldInfo presetFieldInfo =
 									c.GetType().GetField(
@@ -191,8 +206,9 @@ namespace SlimUI.ModernMenu{
 										BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public
 									);
 
-								//Set the sun
-								directionalLightFieldInfo.SetValue(c, lightComp);
+								//Set the moon and sun
+								directionalLightSunFieldInfo.SetValue(c, lightComp);
+								directionalLightMoonFieldInfo.SetValue(c, moonComp);
 
 								//Set the preset for day and night
 								presetFieldInfo.SetValue(c, lightingPreset);

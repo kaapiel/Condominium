@@ -16,7 +16,7 @@ jobs:
           name: "Prepare Env"
           command: |
             readonly unity_hub_path="/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"
-            readonly unity_editor_path="/Applications/Unity/Hub/Editor/2021.3.14f1/Unity.app/Contents/MacOS/Unity"
+            readonly unity_editor_path="/Applications/Unity/Hub/Editor/2021.3.1f1/Unity.app/Contents/MacOS/Unity"
             
             printf '%s\n' "export UNITY_HUB_PATH=\"$unity_hub_path\"" >> "$BASH_ENV"
             printf '%s\n' "export UNITY_EDITOR_PATH=$unity_editor_path" >> "$BASH_ENV"
@@ -45,9 +45,9 @@ jobs:
                     printf '%s\n' "Please install it and try again."
                     return 1
                   fi
-                  changeset="$(npx unity-changeset "2021.3.14f1")"
+                  changeset="$(npx unity-changeset "2021.3.1f1")"
                   set -x
-                  "$unity_hub_path" -- --headless install --version "2021.3.14f1" --changeset "$changeset" --module mac-il2cpp ios --childModules
+                  "$unity_hub_path" -- --headless install --version "2021.3.1f1" --changeset "3b70a0754835" --module mac-il2cpp ios --childModules
                   set +x
                   if [ -f "$unity_editor_path" ]; then
                     printf '%s\n' "Unity Editor installed successfully."
@@ -140,24 +140,15 @@ jobs:
       - run:
           name: "Manage skp and project directory"
           command: |
-            rm -r Assets/Resources/Textures
-            rm -r Assets/Resources/Materials
-            rm -r Assets/Resources/Models
-            rm -r Assets/Resources/Imported
-            rm -r Assets/Resources/Prefabs
-
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
             export SKP_FILE_TOKEN=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.downloadTokens' | tr -d '"')
             echo "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
-            echo ""
             echo "export FILE_NAME=$SKP_FILE_NAME" >> $BASH_ENV
-            echo ""
             curl -o "./Assets/$SKP_FILE_NAME" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
-            echo ""
       - run:
           name: "Build Asset Bundles"
           command: |
-            /Applications/Unity/Hub/Editor/2021.3.14f1/Unity.app/Contents/MacOS/Unity -projectPath . -quit -batchmode -nographics -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" -serial "$RESOLVED_UNITY_SERIAL" -stackTraceLogType 'Script Only' -executeMethod CustomUnityCli.BuildAssetBundles -logFile /dev/stdout "$FILE_NAME"
+            /Applications/Unity/Hub/Editor/2021.3.1f1/Unity.app/Contents/MacOS/Unity -projectPath . -quit -batchmode -nographics -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" -serial "$RESOLVED_UNITY_SERIAL" -stackTraceLogType 'Script Only' -executeMethod CustomUnityCli.BuildAssetBundles -logFile /dev/stdout "$FILE_NAME"
             echo ""
       - store_artifacts:
           path: ./Assets/StreamingAssets
@@ -168,5 +159,5 @@ workflows:
   generate-asset-bundle-workflow:
       jobs:
         #- unity/create-activation-file:
-        #    editor_version: '2021.3.14f1'
+        #    editor_version: '2021.3.1f1'
         - run-command

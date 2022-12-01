@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Cinemachine;
 
 namespace StarterAssets
 {
@@ -40,30 +41,40 @@ namespace StarterAssets
             ScreenCapture.CaptureScreenshot("PrintScreen-" + System.DateTime.UtcNow.ToString("HH:mm:ss - dd_MMMM_yyyy") + ".png");
         }
 
-        public void VirtualSwitchDayNightInput()
+        public void VirtualSwitchPOVInput()
         {
-            if(RenderSettings.skybox.name == "SkyMidnight" || RenderSettings.skybox == null) {
-                Material skyMaterial = Resources.Load("Imported/Skyboxes/Materials/Skybox 22_pan", typeof(Material)) as Material;
-                RenderSettings.skybox = skyMaterial;
-                Image buttonImage = GameObject.Find("Image_Icon_Day_Night").GetComponent<Image>();
-                buttonImage.sprite = Resources.Load("UI/moon", typeof(Sprite)) as Sprite;
+            //3rd
+            GameObject pov = GameObject.Find("PlayerFollowCamera");
+            CinemachineVirtualCamera cinemachineVirtualCamera = pov.GetComponent<CinemachineVirtualCamera>();
+            Cinemachine3rdPersonFollow cinemachine3rdPersonFollow = cinemachineVirtualCamera.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
+            LensSettings m_Lens = cinemachineVirtualCamera.m_Lens;
 
-                GameObject moon = GameObject.Find("Sun");
-                Light moonComponent = moon.GetComponent<Light>();
-                moonComponent.color = Color.white;
-                RenderSettings.sun = moonComponent;
-            } else {
-                Material skyMaterial = Resources.Load("Imported/Skyboxes/Materials/SkyMidnight", typeof(Material)) as Material;
-                RenderSettings.skybox = skyMaterial;
-                Image buttonImage = GameObject.Find("Image_Icon_Day_Night").GetComponent<Image>();
-                buttonImage.sprite = Resources.Load("UI/sun", typeof(Sprite)) as Sprite;
-                
-                GameObject moon = GameObject.Find("Sun");
-                Light moonComponent = moon.GetComponent<Light>();
-                moonComponent.color = Color.white / 2.0f;
-                RenderSettings.sun = moonComponent;
+            //If 3rd view set 1st view
+            if (m_Lens.FieldOfView == 70f)
+            {
+                m_Lens.FieldOfView = 120;
+
+                cinemachine3rdPersonFollow.ShoulderOffset.x = 1;
+                cinemachine3rdPersonFollow.ShoulderOffset.y = 0.3f;
+                cinemachine3rdPersonFollow.ShoulderOffset.z = 0;
+
+                cinemachine3rdPersonFollow.CameraDistance = -0.5f;
+
+                cinemachineVirtualCamera.m_Lens = m_Lens;
             }
-            
+            else
+            {
+                m_Lens.FieldOfView = 70;
+
+                cinemachine3rdPersonFollow.ShoulderOffset.x = 1;
+                cinemachine3rdPersonFollow.ShoulderOffset.y = 0;
+                cinemachine3rdPersonFollow.ShoulderOffset.z = 0;
+
+                cinemachine3rdPersonFollow.CameraDistance = 4f;
+
+                cinemachineVirtualCamera.m_Lens = m_Lens;
+            }
+
         }
         
     }

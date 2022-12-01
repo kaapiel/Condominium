@@ -29,11 +29,6 @@ public class CustomUnityCli : MonoBehaviour
         //GameObject building = AssetDatabase.LoadAssetAtPath(asset_path, typeof(GameObject)) as GameObject;
         //building.transform.localPosition = new Vector3(0, 0, 0);
 
-        Debug.Log("Extracting textures...");
-        ModelImporter modelImporter = AssetImporter.GetAtPath(asset_path) as ModelImporter;
-        modelImporter.ExtractTextures("Assets/Textures/");
-        Debug.Log("Extracting textures finished");
-
         //Import asset into project
         Debug.Log("External file import started...");
         AssetDatabase.ImportAsset(asset_path);

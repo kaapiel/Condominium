@@ -77,7 +77,6 @@ public class CondominiumCustomScripts : MonoBehaviour
                 presetFieldInfo.SetValue(c, lightingPreset);
             }
         }
-
     }
 
     [MenuItem("GameObject/Copy all components and paste on DW06")]

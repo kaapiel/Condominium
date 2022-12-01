@@ -25,10 +25,6 @@ public class CustomUnityCli : MonoBehaviour
         string asset_path = AssetDatabase.GUIDToAssetPath(guid);
         Debug.Log("Asset path retrieved: " + asset_path);
 
-        //Define its coordinates
-        //GameObject building = AssetDatabase.LoadAssetAtPath(asset_path, typeof(GameObject)) as GameObject;
-        //building.transform.localPosition = new Vector3(0, 0, 0);
-
         //Import asset into project
         Debug.Log("External file import started...");
         AssetDatabase.ImportAsset(asset_path);

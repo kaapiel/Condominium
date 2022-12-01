@@ -123,14 +123,14 @@ namespace SlimUI.ModernMenu{
 			        if (www.result == UnityWebRequest.Result.Success) {
 
 			        	//default character
-			        	GameObject controls = Resources.Load("Prefabs/FemaleCharacter") as GameObject;
+			        	GameObject controls = Resources.Load("Prefabs/Characters/FemaleCharacter") as GameObject;
 
 			        	if (GameObject.Find("MALELINE") != null) {
-							controls = Resources.Load("Prefabs/MaleCharacter") as GameObject;
+							controls = Resources.Load("Prefabs/Characters/MaleCharacter") as GameObject;
 						} else if (GameObject.Find("FEMALELINE") != null) {
-							controls = Resources.Load("Prefabs/FemaleCharacter") as GameObject;
+							controls = Resources.Load("Prefabs/Characters/FemaleCharacter") as GameObject;
 						} else if (GameObject.Find("ADVENTURERLINE") != null) {
-							controls = Resources.Load("Prefabs/AdventurerCharacter") as GameObject;
+							controls = Resources.Load("Prefabs/Characters/AdventurerCharacter") as GameObject;
 						}
 
 			        	GameObject.Find("EventSystem").SetActive(false);
@@ -162,8 +162,10 @@ namespace SlimUI.ModernMenu{
 
 						//Download assetbundle
 			        	GameObject asset = DownloadHandlerAssetBundle.GetContent(www).LoadAsset(cadName) as GameObject;
-
 						Debug.Log("Downloaded asset bundle: " + asset);
+
+						//Uncomment this method to quit ghost mode
+						//CreateMeshColliderOnMeshFilter(asset.transform);
 
 						//Set within assetbundle the script to attach the sun
 						asset.AddComponent<LightingManager>();
@@ -197,28 +199,12 @@ namespace SlimUI.ModernMenu{
 							}
 						}
 
-						if (asset.name == "DW06") {
-							asset.transform.localPosition = new Vector3(17.35f, 0, 12);
-				        } else if (asset.name == "EXPAN") {
-				        	asset.transform.localPosition = new Vector3(37, 0, 0);
-				        } else if (asset.name == "GE23") {
-							asset.transform.localPosition = new Vector3(-3, 0, -1);
-				        } else if (asset.name == "M2") {
-							asset.transform.localPosition = new Vector3(-25, 0, -2);
-				        } else if (asset.name == "RIVIERA") {
-				        	asset.transform.localPosition = new Vector3(-12, 0, -4);
-				        } else if (asset.name == "DestroyedCity") {
-				        	ts[3].localPosition = new Vector3(0, 140, 0);
-				        	asset.transform.localPosition = new Vector3(35, 0, 24);
-				        } else if (asset.name == "Forest") {
-				        	ts[3].localPosition = new Vector3(0, 50, 0);
-				        	asset.transform.localPosition = new Vector3(185, 0, -50);
-				        } else if (asset.name == "Mountains") {
-				        	ts[3].localPosition = new Vector3(0, 150, 0);
-				        	asset.transform.localPosition = new Vector3(-1740, 0, -1770);
-				        }
+						//Create a floor :)
+						GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
+						floor.transform.localPosition = new Vector3(0, 0, 0);
+						floor.transform.localScale = new Vector3(500, 500, 500);
 
-		        		Instantiate(asset);
+						Instantiate(asset);
 		        		Instantiate(controls);
 	  				}
 
@@ -228,6 +214,40 @@ namespace SlimUI.ModernMenu{
 
 			yield return null;
         }
+
+		private void CreateMeshColliderOnMeshFilter(Transform trans)
+		{
+			foreach (Transform child in trans)
+			{
+				if (child.childCount > 0)
+				{
+					Component[] components = child.GetComponents<Component>();
+					foreach (Component c in components)
+					{
+						if (c.GetType() == typeof(MeshFilter))
+						{
+							DestroyImmediate(child.gameObject.GetComponent<MeshCollider>());
+							MeshCollider m = child.gameObject.AddComponent<MeshCollider>();
+							m.sharedMesh = ((MeshFilter)c).sharedMesh;
+						}
+					}
+					CreateMeshColliderOnMeshFilter(child);
+				}
+				else
+				{
+					Component[] components = child.GetComponents<Component>();
+					foreach (Component c in components)
+					{
+						if (c.GetType() == typeof(MeshFilter))
+						{
+							DestroyImmediate(child.gameObject.GetComponent<MeshCollider>());
+							MeshCollider m = child.gameObject.AddComponent<MeshCollider>();
+							m.sharedMesh = ((MeshFilter)c).sharedMesh;
+						}
+					}
+				}
+			}
+		}
 
 		[System.Serializable]
 		public class Item {

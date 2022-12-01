@@ -141,7 +141,7 @@ namespace SlimUI.ModernMenu{
 						Scene scene = SceneManager.CreateScene(cadName);
 					  	SceneManager.SetActiveScene(scene);
 
-					  	Material skyMaterial = Resources.Load("Imported/Skyboxes/Materials/Skybox", typeof(Material)) as Material;
+					  	Material skyMaterial = Resources.Load("Materials/SkyboxLiteWarm", typeof(Material)) as Material;
 					  	RenderSettings.skybox = skyMaterial;
 					  	
 					  	GameObject lightGameObject = new GameObject("Sun");

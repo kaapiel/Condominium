@@ -41,7 +41,7 @@ public class CondominiumCustomScripts : MonoBehaviour
         activeGameObject.AddComponent<LightingManager>();
         Component[] components = activeGameObject.GetComponents<Component>();
 
-        Material skyMaterial = Resources.Load("Imported/Skyboxes/Materials/Skybox", typeof(Material)) as Material;
+        Material skyMaterial = Resources.Load("Materials/SkyboxLiteWarm", typeof(Material)) as Material;
         RenderSettings.skybox = skyMaterial;
 
         GameObject lightGameObject = new GameObject("Sun");

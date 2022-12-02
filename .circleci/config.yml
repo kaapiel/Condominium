@@ -28,8 +28,9 @@ jobs:
             
             export FILE_EXISTS=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq 'any(.items[]; .name == "$SKP_FILE_NAME")')
             echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq '.items')
+            echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq '.items' | tr -d '"')
             echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq 'any(.items[]; .name == "\"$SKP_FILE_NAME\"")')
-            echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq 'any(.items[]; .name == "asjhdgjashgdas")')
+            echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq 'any(.items[]; .name == "$SKP_FILE_NAME")')
             
             if [ $FILE_EXISTS = true ]; then
               echo "There is an asset with the same name as the external file. Deleting the file and finishing the job..."

@@ -24,11 +24,10 @@ jobs:
           command: |
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
             export SKP_FILE_NAME="${SKP_FILE_NAME%.*}"
-            export ASSET_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq -e '.items|any(. == "$SKP_FILE_NAME")' | tr -d '"')
+            export FILE_EXISTS=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq 'any(.items[].name; . == "$SKP_FILE_NAME")' | tr -d '"')
             
-            export FILE_EXISTS=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq 'any(.items[]; .name == "$SKP_FILE_NAME")')
-            echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq '.items')
-            echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq '.items[].name')
+            echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq '.items[].name' | tr -d '"')
+            echo $SKP_FILE_NAME
             echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq 'any(.items[]; .name == "$SKP_FILE_NAME")' | tr -d '"')
             
             if [ $FILE_EXISTS = true ]; then

@@ -40,13 +40,18 @@ jobs:
       - run:
           name: "Downloading external file"
           command: |
-            circleci-agent step halt
             mkdir ./Assets
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
             export SKP_FILE_TOKEN=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.downloadTokens' | tr -d '"')
             echo "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
             echo "export FILE_NAME=$SKP_FILE_NAME" >> $BASH_ENV
-          #  curl -o "./Assets/$SKP_FILE_NAME" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
+            echo "export FILE_NAME_WITHOUT_EXTENSION=${FILE_NAME%.*}" >> $BASH_ENV
+            curl -o "./Assets/$SKP_FILE_NAME" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
+      - run:
+          name: "Upload asset bundles to firebase bucket"
+          command: |
+            echo "Uploading assetbundle to firebase bucket"
+            curl -X POST --data-binary "./Assets/${FILE_NAME}" -H "Authorization: Bearer ${GCS_ACCESS_TOKEN}" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-assetbundles.appspot.com/o?uploadType=media&name=${FILE_NAME}"      
       - checkout
       - run:
           name: "Prepare Env"
@@ -180,6 +185,11 @@ jobs:
             echo ""
       - store_artifacts:
           path: ./Assets/StreamingAssets
+      - run:
+          name: "Upload asset bundles to firebase bucket"
+          command: |
+            echo "Uploading assetbundle to firebase bucket"
+            curl -X POST --data-binary "./Assets/StreamingAssets/${FILE_NAME_WITHOUT_EXTENSION}" -H "Authorization: Bearer ${GCS_ACCESS_TOKEN}" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-assetbundles.appspot.com/o?uploadType=media&name=${FILE_NAME_WITHOUT_EXTENSION}"
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows

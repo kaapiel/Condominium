@@ -15,8 +15,7 @@ jobs:
           name: "Validate firebase bucket"
           command: |
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items' | tr -d '"')
-            echo $SKP_FILE_NAME
-            if [ -z "$SKP_FILE_NAME" ]; then
+            if [ $SKP_FILE_NAME = "[]" ]; then
               echo "There is no file in the repository, finishing job..."
               circleci-agent step halt
             fi

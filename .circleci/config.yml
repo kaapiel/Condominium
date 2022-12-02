@@ -14,7 +14,7 @@ jobs:
       - run:
           name: "Decode Google Cloud Private Key"
           command: |
-            export ACCESS_TOKEN="$(gcloud auth activate-service-account --key-file ./service-account.json)"
+            export ACCESS_TOKEN=$(gcloud auth activate-service-account --key-file ./service-account.json)
             brew install --cask google-cloud-sdk
             printf "$GC_PRIVATE_KEY_ENCODED" | base64 --decode >> ./service-account.json
             export ACCESS_TOKEN="$(gcloud auth activate-service-account --key-file ./service-account.json)"

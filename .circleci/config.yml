@@ -27,9 +27,9 @@ jobs:
             export ASSET_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq -e '.items|any(. == "$SKP_FILE_NAME")' | tr -d '"')
             
             echo $SKP_FILE_NAME
-            echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq 'any(.items[];')
-            echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq 'any(.items[]; .')
-            echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq 'any(.items[]; .name')
+            echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq 'any(.items[];)')
+            echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq 'any(.items[]; .)')
+            echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq 'any(.items[]; .name)')
             echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq 'any(.items[]; .name == "$SKP_FILE_NAME")')
             echo $ASSET_FILE_NAME
             

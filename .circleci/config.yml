@@ -26,10 +26,7 @@ jobs:
             export SKP_FILE_NAME="${SKP_FILE_NAME%.*}"
             export ASSET_NAMES=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq '.items[].name' | tr -d '"')
             
-            echo $SKP_FILE_NAME
-            echo $ASSET_NAMES
-            
-            if [ "$ASSET_NAMES" == *"$SKP_FILE_NAME"* ]; then
+            if [ "$SKP_FILE_NAME" == *"$ASSET_NAMES"* ]; then
               echo "There is an asset with the same name as the external file. Deleting the file and finishing the job..."
               
               circleci-agent step halt

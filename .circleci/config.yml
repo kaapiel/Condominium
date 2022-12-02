@@ -28,7 +28,7 @@ jobs:
             
             echo $SKP_FILE_NAME
             echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq -e '.items|any(.name == "$SKP_FILE_NAME")')
-            echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | any(.items[]; .name == "$SKP_FILE_NAME")')
+            echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | any(.items[]; .name == "$SKP_FILE_NAME"))
             echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq any(.items[]; .name == "$SKP_FILE_NAME"))
             echo $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq 'any(.items[]; .name == "$SKP_FILE_NAME")')
             echo $ASSET_FILE_NAME

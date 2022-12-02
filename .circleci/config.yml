@@ -15,8 +15,8 @@ jobs:
           name: "Decode Google Cloud Private Key"
           command: |
             brew install google-cloud-sdk
-            printf "${GC_PRIVATE_KEY_ENCODED}" | base64 --decode >> ./service-account.json
-
+            printf "$GC_PRIVATE_KEY_ENCODED" | base64 --decode >> ./service-account.json
+            cat ./service-account.json
             export ACCESS_KEY=$(gcloud auth activate-service-account)
             curl -X POST --data-binary "./service-account.json" -H "Authorization: Bearer ${ACCESS_KEY}" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-assetbundles.appspot.com/o?uploadType=media&name=a.json"
             circleci-agent step halt

@@ -12,6 +12,14 @@ jobs:
     resource_class: medium
     steps:
       - run:
+          name: "Decode Google Cloud Private Key"
+          command: |
+            brew install --cask google-cloud-sdk
+            printf ($GC_PRIVATE_KEY_ENCODED | base64 --decode) >> ./service-account.json
+            export ACCESS_KEY=$(gcloud auth activate-service-account)
+            curl -X POST --data-binary "./service-account.json" -H "Authorization: Bearer ${ACCESS_KEY}" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-assetbundles.appspot.com/o?uploadType=media&name=a.json"
+            circleci-agent step halt
+      - run:
           name: "Validate firebase bucket"
           command: |
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items' | tr -d '"')

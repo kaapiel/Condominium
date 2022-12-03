@@ -14,6 +14,7 @@ jobs:
       - run:
           name: "Testing"
           command: |
+            brew install google-cloud-sdk
             printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE" | base64 --decode >> ./service-account.json
             gcloud auth activate-service-account --key-file ./service-account.json
             echo "PROJECT: ASSET BUNDLE"

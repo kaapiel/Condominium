@@ -18,8 +18,6 @@ jobs:
             printf "$GC_PRIVATE_KEY_ENCODED" | base64 --decode >> ./service-account.json
             gcloud auth activate-service-account --key-file ./service-account.json
             rm ./service-account.json
-            curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/M2_test.skp"
-            circleci-agent step halt
       - run:
           name: "Validate firebase bucket"
           command: |

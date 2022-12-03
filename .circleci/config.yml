@@ -12,6 +12,28 @@ jobs:
     resource_class: medium
     steps:
       - run:
+          name: "Testing"
+          command: |
+            printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE" | base64 --decode >> ./service-account.json
+            gcloud auth activate-service-account --key-file ./service-account.json
+            echo "PROJECT: ASSET BUNDLE"
+            echo "PRIVATE KEY FILE"
+            cat ./service-account.json
+            echo ""
+            rm ./service-account.json
+            curl -X POST --data-binary @"./a.test" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-assetbundles.appspot.com/o?uploadType=media&name=a.test"
+
+            printf "$GC_PRIVATE_KEY_ENCODED" | base64 --decode >> ./service-account.json
+            gcloud auth activate-service-account --key-file ./service-account.json
+            echo "PROJECT: CONDOMINIUM-UNITY"
+            echo "PRIVATE KEY FILE"
+            cat ./service-account.json
+            echo ""
+            rm ./service-account.json
+            curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}"
+
+            circleci-agent step halt
+      - run:
           name: "Validate firebase bucket"
           command: |
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items' | tr -d '"')

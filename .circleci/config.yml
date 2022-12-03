@@ -23,6 +23,7 @@ jobs:
             echo ""
             rm ./service-account.json
             curl -X POST --data-binary @"./a.test" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-assetbundles.appspot.com/o?uploadType=media&name=a.test"
+            gcloud auth revoke condominium-assetbundles@appspot.gserviceaccount.com
 
             printf "$GC_PRIVATE_KEY_ENCODED" | base64 --decode >> ./service-account.json
             gcloud auth activate-service-account --key-file ./service-account.json

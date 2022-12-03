@@ -12,15 +12,11 @@ jobs:
     resource_class: medium
     steps:
       - run:
-          name: "Decode Google Cloud Private Key"
+          name: "Install Google Cloud sdk"
           command: |
             brew install --cask google-cloud-sdk
             printf "$GC_PRIVATE_KEY_ENCODED" | base64 --decode >> ./service-account.json
             gcloud auth activate-service-account --key-file ./service-account.json
-            export ACCESS_TOKEN="$(gcloud auth print-access-token)"
-            echo $ACCESS_TOKEN
-            curl -X POST --data-binary "./service-account.json" -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-assetbundles.appspot.com/o?uploadType=media&name=a.json"
-            circleci-agent step halt
       - run:
           name: "Validate firebase bucket"
           command: |
@@ -41,7 +37,7 @@ jobs:
             if [[ $ASSET_NAMES == *"${SKP_FILE_NAME%.*}"* ]]; 
             then
               echo "There is an asset with the same name as this external file. Deleting the file and finishing the job..."
-              curl -X DELETE -H "Authorization: Bearer ${GCS_ACCESS_TOKEN}" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}"
+              curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}"
               circleci-agent step halt
             else
               echo "There are no assets with same name as this external file, resuming job..."
@@ -191,12 +187,12 @@ jobs:
           name: "Upload asset bundles to firebase bucket"
           command: |
             echo "Uploading assetbundle to firebase bucket"
-            curl -X POST --data-binary @"./Assets/StreamingAssets/${FILE_NAME%.*}" -H "Authorization: Bearer ${GCS_ACCESS_TOKEN}" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-assetbundles.appspot.com/o?uploadType=media&name=${FILE_NAME%.*}"
+            curl -X POST --data-binary @"./Assets/StreamingAssets/${FILE_NAME%.*}" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-assetbundles.appspot.com/o?uploadType=media&name=${FILE_NAME%.*}"
       - run:
           name: "Delete external file from firebase bucket"
           command: |
             echo "Deleting external file from firebase bucket"
-            curl -X DELETE -H "Authorization: Bearer ${GCS_ACCESS_TOKEN}" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${FILE_NAME}"
+            curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${FILE_NAME}"
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows

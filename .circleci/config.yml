@@ -17,6 +17,7 @@ jobs:
             brew install --cask google-cloud-sdk
             printf "$GC_PRIVATE_KEY_ENCODED" | base64 --decode >> ./service-account.json
             gcloud auth activate-service-account --key-file ./service-account.json
+            rm ./service-account.json
       - run:
           name: "Validate firebase bucket"
           command: |

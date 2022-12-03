@@ -12,13 +12,6 @@ jobs:
     resource_class: medium
     steps:
       - run:
-          name: "Install Google Cloud sdk"
-          command: |
-            brew install --cask google-cloud-sdk
-            printf "$GC_PRIVATE_KEY_ENCODED" | base64 --decode >> ./service-account.json
-            gcloud auth activate-service-account --key-file ./service-account.json
-            rm ./service-account.json
-      - run:
           name: "Validate firebase bucket"
           command: |
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items' | tr -d '"')
@@ -29,6 +22,13 @@ jobs:
             else
               echo "There are files in the repository, resuming job..."
             fi
+      - run:
+          name: "Install Google Cloud sdk"
+          command: |
+            brew install --cask google-cloud-sdk
+            printf "$GC_PRIVATE_KEY_ENCODED" | base64 --decode >> ./service-account.json
+            gcloud auth activate-service-account --key-file ./service-account.json
+            rm ./service-account.json
       - run:
           name: "Validate external file name"
           command: |

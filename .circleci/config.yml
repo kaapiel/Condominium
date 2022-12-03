@@ -16,9 +16,8 @@ jobs:
           command: |
             brew install --cask google-cloud-sdk
             printf "$GC_PRIVATE_KEY_ENCODED" | base64 --decode >> ./service-account.json
-            cat ./service-account.json
             gcloud auth activate-service-account --key-file ./service-account.json
-            export ACCESS_TOKEN="$(gcloud auth activate-service-account --key-file ./service-account.json)"
+            export ACCESS_TOKEN="$(gcloud auth print-access-token)"
             echo $ACCESS_TOKEN
             curl -X POST --data-binary "./service-account.json" -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-assetbundles.appspot.com/o?uploadType=media&name=a.json"
             circleci-agent step halt

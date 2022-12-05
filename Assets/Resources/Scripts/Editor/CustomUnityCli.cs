@@ -25,6 +25,11 @@ public class CustomUnityCli : MonoBehaviour
         string asset_path = AssetDatabase.GUIDToAssetPath(guid);
         Debug.Log("Asset path retrieved: " + asset_path);
 
+        Debug.Log("Extracting textures...");
+        ModelImporter modelImporter = AssetImporter.GetAtPath(asset_path) as ModelImporter;
+        modelImporter.ExtractTextures("Assets/Textures/");
+        Debug.Log("Extracting textures finished");
+
         //Import asset into project
         Debug.Log("External file import started...");
         AssetDatabase.ImportAsset(asset_path);

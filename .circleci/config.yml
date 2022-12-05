@@ -11,7 +11,47 @@ jobs:
       xcode: 12.5.1
     resource_class: medium
     steps:
+      - run:
+          name: "Validate firebase bucket"
+          command: |
+            export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items' | tr -d '"')
+            if [ "$SKP_FILE_NAME" == "[]" ]; 
+            then
+              echo "There is no file in the repository, finishing job..."
+              circleci-agent step halt
+            else
+              echo "There are files in the repository, resuming job..."
+            fi
+      - run:
+          name: "Install Google Cloud sdk"
+          command: |
+            brew install --cask google-cloud-sdk
+      - run:
+          name: "Validate external file name"
+          command: |
+            export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
+            export ASSET_NAMES=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq '.items[].name' | tr -d '"')
+
+            if [[ $ASSET_NAMES == *"${SKP_FILE_NAME%.*}"* ]]; 
+            then
+              echo "There is an asset with the same name as this external file. Deleting the file and finishing the job..."
+              printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
+              gcloud auth activate-service-account --key-file ./service-account.json
+              rm ./service-account.json
+              curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}"
+              circleci-agent step halt
+            else
+              echo "There are no assets with same name as this external file, resuming job..."
+            fi
       - checkout
+      - run:
+          name: "Downloading external file"
+          command: |
+            export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
+            export SKP_FILE_TOKEN=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.downloadTokens' | tr -d '"')
+            echo "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
+            echo "export FILE_NAME=$SKP_FILE_NAME" >> $BASH_ENV
+            curl -o "./Assets/$SKP_FILE_NAME" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
       - run:
           name: "Prepare Env"
           command: |
@@ -138,20 +178,28 @@ jobs:
               -logfile /dev/stdout
             set +x
       - run:
-          name: "Manage skp and project directory"
-          command: |
-            export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
-            export SKP_FILE_TOKEN=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.downloadTokens' | tr -d '"')
-            echo "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
-            echo "export FILE_NAME=$SKP_FILE_NAME" >> $BASH_ENV
-            curl -o "./Assets/$SKP_FILE_NAME" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
-      - run:
           name: "Build Asset Bundles"
           command: |
             /Applications/Unity/Hub/Editor/2021.3.1f1/Unity.app/Contents/MacOS/Unity -projectPath . -quit -batchmode -nographics -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" -serial "$RESOLVED_UNITY_SERIAL" -stackTraceLogType 'Script Only' -executeMethod CustomUnityCli.BuildAssetBundles -logFile /dev/stdout "$FILE_NAME"
             echo ""
       - store_artifacts:
           path: ./Assets/StreamingAssets
+      - run:
+          name: "Upload asset bundles to firebase bucket"
+          command: |
+            echo "Uploading assetbundle to firebase bucket"
+            printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE" | base64 --decode >> ./service-account.json
+            gcloud auth activate-service-account --key-file ./service-account.json
+            rm ./service-account.json
+            curl -X POST --data-binary @"./Assets/StreamingAssets/${FILE_NAME%.*}" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-assetbundles.appspot.com/o?uploadType=media&name=${FILE_NAME%.*}"
+      - run:
+          name: "Delete external file from firebase bucket"
+          command: |
+            echo "Deleting external file from firebase bucket"
+            printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
+            gcloud auth activate-service-account --key-file ./service-account.json
+            rm ./service-account.json
+            curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${FILE_NAME}"
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows

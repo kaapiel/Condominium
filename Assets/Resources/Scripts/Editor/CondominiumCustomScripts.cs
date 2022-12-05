@@ -169,6 +169,11 @@ public class CondominiumCustomScripts : MonoBehaviour
     {
         foreach (Transform child in trans)
         {
+            if (child.name.Contains("[Door]") || child.name.Contains("[Window]"))
+            {
+                continue;
+            }
+
             if (child.childCount > 0)
             {
                 Component[] components = child.GetComponents<Component>();

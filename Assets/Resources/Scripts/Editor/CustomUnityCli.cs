@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
@@ -12,12 +10,13 @@ public class CustomUnityCli : MonoBehaviour
     static void BuildAssetBundles()
     {
 
-        string arg = System.IO.Path.GetFileNameWithoutExtension(GetArg("-executeMethod"));
-        Debug.Log("External file found: " + arg);
+        string file_name = GetArg("-executeMethod");
+        string file_without_extension = System.IO.Path.GetFileNameWithoutExtension(file_name);
+        Debug.Log("External file found: " + file_without_extension);
 
         //Find prefab name and get its GUID
-        Debug.Log("Finding GUID from asset name: " + arg);
-        string guid = AssetDatabase.FindAssets(arg, null)[0];
+        Debug.Log("Finding GUID from asset name: " + file_without_extension);
+        string guid = AssetDatabase.FindAssets(file_without_extension, null)[0];
         Debug.Log("Asset GUID found: " + guid);
 
         //Retrieve file path from GUID
@@ -26,8 +25,11 @@ public class CustomUnityCli : MonoBehaviour
         Debug.Log("Asset path retrieved: " + asset_path);
 
         Debug.Log("Extracting textures...");
-        ModelImporter modelImporter = AssetImporter.GetAtPath(asset_path) as ModelImporter;
-        modelImporter.ExtractTextures("Assets/Textures/");
+        if (!file_name.EndsWith(".unitypackage"))
+        {
+            ModelImporter modelImporter = AssetImporter.GetAtPath(asset_path) as ModelImporter;
+            modelImporter.ExtractTextures("Assets/Textures/");
+        }
         Debug.Log("Extracting textures finished");
 
         //Import asset into project
@@ -36,8 +38,8 @@ public class CustomUnityCli : MonoBehaviour
         Debug.Log("External file import finished!");
 
         //Set bundle name into prefab
-        Debug.Log("Set asset bundle name and variant of " + arg);
-        UnityEditor.AssetImporter.GetAtPath(asset_path).SetAssetBundleNameAndVariant(arg, "");
+        Debug.Log("Set asset bundle name and variant of " + file_without_extension);
+        UnityEditor.AssetImporter.GetAtPath(asset_path).SetAssetBundleNameAndVariant(file_without_extension, "");
         Debug.Log("Asset bundle name and variant set!");
 
         //Build iOS asset bundles

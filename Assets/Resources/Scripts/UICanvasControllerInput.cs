@@ -76,7 +76,27 @@ namespace StarterAssets
             }
 
         }
-        
+
+        public void VirtualFlashLightInput()
+        {
+            GameObject mainCamera = GameObject.Find("MainCamera");
+            foreach (Transform t in mainCamera.transform)
+            {
+                if (t.name == "FlashLight")
+                {
+                    if (t.gameObject.active == false)
+                    {
+                        t.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        t.gameObject.SetActive(false);
+                    }
+                    break;
+                }
+            }
+        }
+
     }
 
 }

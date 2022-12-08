@@ -175,7 +175,7 @@ namespace SlimUI.ModernMenu{
 						Debug.Log("Downloaded asset bundle: " + asset);
 
 						//Uncomment this method to quit ghost mode
-						//CreateMeshColliderOnMeshFilter(asset.transform);
+						CreateMeshColliderOnMeshFilter(asset.transform);
 
 						//Set within assetbundle the script to attach the sun
 						asset.AddComponent<LightingManager>();
@@ -217,8 +217,8 @@ namespace SlimUI.ModernMenu{
 
 						//Create a floor :)
 						GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
-						floor.transform.localPosition = new Vector3(0, 0, 0);
-						floor.transform.localScale = new Vector3(500, 500, 500);
+						floor.transform.localPosition = new Vector3(0, -1, 0);
+						floor.transform.localScale = new Vector3(500, 0, 500);
 
 						Instantiate(asset);
 		        		Instantiate(controls);
@@ -245,6 +245,7 @@ namespace SlimUI.ModernMenu{
 							DestroyImmediate(child.gameObject.GetComponent<MeshCollider>());
 							MeshCollider m = child.gameObject.AddComponent<MeshCollider>();
 							m.sharedMesh = ((MeshFilter)c).sharedMesh;
+							
 						}
 					}
 					CreateMeshColliderOnMeshFilter(child);

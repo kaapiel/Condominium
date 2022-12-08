@@ -28,6 +28,7 @@ public class CustomUnityCli : MonoBehaviour
         if (!file_name.EndsWith(".unitypackage"))
         {
             ModelImporter modelImporter = AssetImporter.GetAtPath(asset_path) as ModelImporter;
+            modelImporter.isReadable = true;
             modelImporter.ExtractTextures("Assets/Textures/");
         }
         Debug.Log("Extracting textures finished");

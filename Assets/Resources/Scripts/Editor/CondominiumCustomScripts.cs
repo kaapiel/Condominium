@@ -20,7 +20,7 @@ public class CondominiumCustomScripts : MonoBehaviour
     static List<Transform> transforms_skp = new List<Transform>(); 
     static List<Transform> transforms = new List<Transform>();
 
-    [MenuItem("GameObject/Build AssetBundles")]
+    [MenuItem("Condominium/Build AssetBundles")]
     static void BuildAssetBundles()
     {
         string assetsBundleDirectory = "Assets/StreamingAssets";
@@ -33,7 +33,7 @@ public class CondominiumCustomScripts : MonoBehaviour
 
     }
 
-    [MenuItem("GameObject/Add dynamic day and night into asset")]
+    [MenuItem("Condominium/Add dynamic day and night into asset")]
     static void AddScriptIntoAsset()
     {
         GameObject activeGameObject = Selection.activeGameObject;
@@ -62,6 +62,26 @@ public class CondominiumCustomScripts : MonoBehaviour
         lightingPreset.AmbientColor = new Gradient();
         lightingPreset.DirectionalColor = new Gradient();
         lightingPreset.FogColor = new Gradient();
+
+        //Create a floor :)
+        GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        floor.transform.localPosition = new Vector3(0, 0, 0);
+        floor.transform.localScale = new Vector3(500, 0.5f, 500);
+
+        Material waterMaterial = Resources.Load("Imported/AQUAS-Lite/Materials/AQUAS_Lite_Water", typeof(Material)) as Material;
+        Material waterBackFaceMaterial = Resources.Load("Imported/AQUAS-Lite/Materials/AQUAS_Lite_Water_Backface", typeof(Material)) as Material;
+
+        Component[] comps = floor.GetComponents<Component>();
+        foreach (Component comp in comps)
+        {
+            if (comp.GetType() == typeof(MeshRenderer))
+            {
+                Material[] mats = new Material[2];
+                mats[0] = waterMaterial;
+                mats[1] = waterBackFaceMaterial;
+                ((MeshRenderer)comp).materials = mats;
+            }
+        }
 
         foreach (Component c in components)
         {
@@ -93,7 +113,7 @@ public class CondominiumCustomScripts : MonoBehaviour
         }
     }
 
-    [MenuItem("GameObject/Copy all components and paste on DW06")]
+    [MenuItem("Condominium/Copy all components and paste on DW06")]
     static void Copy()
     {
         DisplayChildren(Selection.activeGameObject.transform);
@@ -116,7 +136,7 @@ public class CondominiumCustomScripts : MonoBehaviour
         }
     }
 
-    [MenuItem("GameObject/Remove Empty Mesh Colliders")]
+    [MenuItem("Condominium/Remove Empty Mesh Colliders")]
     static void Remove()
     {
         RemoveAllEmptyMeshColliders(Selection.activeGameObject.transform);
@@ -158,7 +178,7 @@ public class CondominiumCustomScripts : MonoBehaviour
         }
     }
 
-    [MenuItem("GameObject/Create MeshCollider on MeshFilter")]
+    [MenuItem("Condominium/Create MeshCollider on MeshFilter")]
     static void CreateMeshCollider()
     {
         CreateMeshColliderOnMeshFilter(Selection.activeGameObject.transform);
@@ -166,9 +186,25 @@ public class CondominiumCustomScripts : MonoBehaviour
 
     static void CreateMeshColliderOnMeshFilter(Transform trans)
     {
+        //This is the first object (parent)
+        Component[] comps = trans.GetComponents<Component>();
+        foreach (Component c in comps)
+        {
+            if (c.GetType() == typeof(MeshFilter))
+            {
+                DestroyImmediate(trans.gameObject.GetComponent<MeshCollider>());
+                MeshCollider m = trans.gameObject.AddComponent<MeshCollider>();
+                m.sharedMesh = ((MeshFilter)c).sharedMesh;
+                //m.convex = true;
+                //Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
+                //rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
+            }
+        }
+
+        //This is all the children (sub gameobjects)
         foreach (Transform child in trans)
         {
-            if (child.name.Contains("[Door]") || child.name.Contains("[Window]"))
+            if (child.name.Contains("Door") || child.name.Contains("Window"))
             {
                 continue;
             }
@@ -183,6 +219,9 @@ public class CondominiumCustomScripts : MonoBehaviour
                         DestroyImmediate(child.gameObject.GetComponent<MeshCollider>());
                         MeshCollider m = child.gameObject.AddComponent<MeshCollider>();
                         m.sharedMesh = ((MeshFilter)c).sharedMesh;
+                        //m.convex = true;
+                        //Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
+                        //rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
                     }
                 }
                 CreateMeshColliderOnMeshFilter(child);
@@ -197,18 +236,15 @@ public class CondominiumCustomScripts : MonoBehaviour
                         DestroyImmediate(child.gameObject.GetComponent<MeshCollider>());
                         MeshCollider m = child.gameObject.AddComponent<MeshCollider>();
                         m.sharedMesh = ((MeshFilter)c).sharedMesh;
+                        //m.convex = true;
+                        //Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
+                        //rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
                     }
                 }
             }
         }
     }
-
-    [MenuItem("GameObject/Attach Meshes")]
-    static void Attach()
-    {
-        AttachMeshes(Selection.activeGameObject.transform);
-    }
-
+    
     static void AttachMeshes(Transform trans)
     {
         foreach (Transform child in trans)

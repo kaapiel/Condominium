@@ -216,9 +216,24 @@ namespace SlimUI.ModernMenu{
 						}
 
 						//Create a floor :)
-						GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
-						floor.transform.localPosition = new Vector3(0, -1, 0);
-						floor.transform.localScale = new Vector3(500, 0, 500);
+						GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
+						floor.transform.localPosition = new Vector3(0, 0, 0);
+						floor.transform.localScale = new Vector3(500, 0.5f, 500);
+
+						Material waterMaterial = Resources.Load("Imported/AQUAS-Lite/Materials/AQUAS_Lite_Water", typeof(Material)) as Material;
+						Material waterBackFaceMaterial = Resources.Load("Imported/AQUAS-Lite/Materials/AQUAS_Lite_Water_Backface", typeof(Material)) as Material;
+
+                        Component[] comps = floor.GetComponents<Component>();
+                        foreach (Component comp in comps)
+                        {
+							if (comp.GetType() == typeof(MeshRenderer))
+                            {
+                                Material[] mats = new Material[2];
+								mats[0] = waterMaterial;
+								mats[1] = waterBackFaceMaterial;
+								((MeshRenderer)comp).materials = mats;
+                            }
+                        }
 
 						Instantiate(asset);
 		        		Instantiate(controls);

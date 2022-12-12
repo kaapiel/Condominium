@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class FixedTouchField : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+public class FixedTouchField : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerMoveHandler
 {
     [HideInInspector]
     public Vector2 TouchDist;
@@ -30,8 +30,16 @@ public class FixedTouchField : MonoBehaviour, IPointerDownHandler, IPointerUpHan
             }
             else
             {
-                TouchDist = new Vector2(Input.mousePosition.x, Input.mousePosition.y) - PointerOld;
-                PointerOld = Input.mousePosition;
+                if (Input.touchCount > 1)
+                {
+                    TouchDist = new Vector2(Input.GetTouch(1).position.x, Input.GetTouch(1).position.y) - PointerOld;
+                    PointerOld = Input.GetTouch(1).position;
+                } else
+                {
+                    TouchDist = new Vector2(Input.GetTouch(0).position.x, Input.GetTouch(0).position.y) - PointerOld;
+                    PointerOld = Input.GetTouch(0).position;
+                }
+                
             }
         }
         else
@@ -52,5 +60,9 @@ public class FixedTouchField : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     {
         Pressed = false;
     }
-    
+
+    public void OnPointerMove(PointerEventData eventData)
+    {
+        
+    }
 }

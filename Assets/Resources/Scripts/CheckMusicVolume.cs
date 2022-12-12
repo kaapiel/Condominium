@@ -248,6 +248,22 @@ namespace SlimUI.ModernMenu{
 
 		private void CreateMeshColliderOnMeshFilter(Transform trans)
 		{
+			//This is the first object (parent)
+			Component[] comps = trans.GetComponents<Component>();
+			foreach (Component c in comps)
+			{
+				if (c.GetType() == typeof(MeshFilter))
+				{
+					DestroyImmediate(trans.gameObject.GetComponent<MeshCollider>());
+					MeshCollider m = trans.gameObject.AddComponent<MeshCollider>();
+					m.sharedMesh = ((MeshFilter)c).sharedMesh;
+					//m.convex = true;
+					//Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
+					//rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
+				}
+			}
+
+			//This is all the children (sub gameobjects)
 			foreach (Transform child in trans)
 			{
 				if (child.childCount > 0)

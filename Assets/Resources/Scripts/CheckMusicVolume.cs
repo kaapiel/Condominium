@@ -217,7 +217,7 @@ namespace SlimUI.ModernMenu{
 
 						//Create a floor :)
 						GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
-						floor.transform.localPosition = new Vector3(0, 0, 0);
+						floor.transform.localPosition = new Vector3(0, -0.25f, 0);
 						floor.transform.localScale = new Vector3(500, 0.5f, 500);
 
 						Material waterMaterial = Resources.Load("Imported/AQUAS-Lite/Materials/AQUAS_Lite_Water", typeof(Material)) as Material;
@@ -261,6 +261,12 @@ namespace SlimUI.ModernMenu{
 					//Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
 					//rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
 				}
+
+				if (c.GetType() == typeof(Camera))
+				{
+					Camera cam = c as Camera;
+					cam.enabled = false;
+				}
 			}
 
 			//This is all the children (sub gameobjects)
@@ -278,6 +284,12 @@ namespace SlimUI.ModernMenu{
 							m.sharedMesh = ((MeshFilter)c).sharedMesh;
 							
 						}
+
+						if (c.GetType() == typeof(Camera))
+						{
+							Camera cam = c as Camera;
+							cam.enabled = false;
+						}
 					}
 					CreateMeshColliderOnMeshFilter(child);
 				}
@@ -291,6 +303,12 @@ namespace SlimUI.ModernMenu{
 							DestroyImmediate(child.gameObject.GetComponent<MeshCollider>());
 							MeshCollider m = child.gameObject.AddComponent<MeshCollider>();
 							m.sharedMesh = ((MeshFilter)c).sharedMesh;
+						}
+
+						if (c.GetType() == typeof(Camera))
+						{
+							Camera cam = c as Camera;
+							cam.enabled = false;
 						}
 					}
 				}

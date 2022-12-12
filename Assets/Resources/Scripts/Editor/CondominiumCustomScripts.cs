@@ -65,7 +65,7 @@ public class CondominiumCustomScripts : MonoBehaviour
 
         //Create a floor :)
         GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        floor.transform.localPosition = new Vector3(0, 0, 0);
+        floor.transform.localPosition = new Vector3(0, -0.25f, 0);
         floor.transform.localScale = new Vector3(500, 0.5f, 500);
 
         Material waterMaterial = Resources.Load("Imported/AQUAS-Lite/Materials/AQUAS_Lite_Water", typeof(Material)) as Material;
@@ -199,6 +199,13 @@ public class CondominiumCustomScripts : MonoBehaviour
                 //Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
                 //rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
             }
+
+            if (c.GetType() == typeof(Camera))
+            {
+                Debug.Log("Camera found");
+                Camera cam = c as Camera;
+                cam.enabled = false;
+            }
         }
 
         //This is all the children (sub gameobjects)
@@ -223,6 +230,13 @@ public class CondominiumCustomScripts : MonoBehaviour
                         //Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
                         //rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
                     }
+
+                    if (c.GetType() == typeof(Camera))
+                    {
+                        Debug.Log("Camera found");
+                        Camera cam = c as Camera;
+                        cam.enabled = false;
+                    }
                 }
                 CreateMeshColliderOnMeshFilter(child);
             }
@@ -239,6 +253,13 @@ public class CondominiumCustomScripts : MonoBehaviour
                         //m.convex = true;
                         //Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
                         //rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
+                    }
+
+                    if (c.GetType() == typeof(Camera))
+                    {
+                        Debug.Log("Camera found");
+                        Camera cam = c as Camera;
+                        cam.enabled = false;
                     }
                 }
             }

@@ -269,9 +269,17 @@ namespace SlimUI.ModernMenu{
 				}
 			}
 
-			//This is all the children (sub gameobjects)
+			//This are all the children (sub gameobjects)
 			foreach (Transform child in trans)
 			{
+				if (child.name.Contains("Door") ||
+					child.name.Contains("Window") ||
+					child.name.Contains("animation") ||
+					child.name.Contains("WaterPlane"))
+				{
+					continue;
+				}
+
 				if (child.childCount > 0)
 				{
 					Component[] components = child.GetComponents<Component>();

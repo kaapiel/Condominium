@@ -202,7 +202,6 @@ public class CondominiumCustomScripts : MonoBehaviour
 
             if (c.GetType() == typeof(Camera))
             {
-                Debug.Log("Camera found");
                 Camera cam = c as Camera;
                 cam.enabled = false;
             }
@@ -211,7 +210,10 @@ public class CondominiumCustomScripts : MonoBehaviour
         //This is all the children (sub gameobjects)
         foreach (Transform child in trans)
         {
-            if (child.name.Contains("Door") || child.name.Contains("Window"))
+            if (child.name.Contains("Door") ||
+                    child.name.Contains("Window") ||
+                    child.name.Contains("animation") ||
+                    child.name.Contains("WaterPlane"))
             {
                 continue;
             }
@@ -233,7 +235,6 @@ public class CondominiumCustomScripts : MonoBehaviour
 
                     if (c.GetType() == typeof(Camera))
                     {
-                        Debug.Log("Camera found");
                         Camera cam = c as Camera;
                         cam.enabled = false;
                     }
@@ -257,7 +258,6 @@ public class CondominiumCustomScripts : MonoBehaviour
 
                     if (c.GetType() == typeof(Camera))
                     {
-                        Debug.Log("Camera found");
                         Camera cam = c as Camera;
                         cam.enabled = false;
                     }

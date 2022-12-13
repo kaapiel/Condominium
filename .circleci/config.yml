@@ -17,6 +17,8 @@ jobs:
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items' | tr -d '"')
             export FILE_SIZE=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/$SKP_FILE_NAME' | jq '.size' | tr -d '"')
             
+            echo "File name: ${SKP_FILE_NAME}"
+
             if [[ $SKP_FILE_NAME == " " ]];
             then
               echo "The file contains special characters like spaces. Deleting the file."
@@ -29,7 +31,7 @@ jobs:
               circleci-agent step halt
             fi
             
-            if [ $FILE_SIZE -ge 1000000000 ];
+            if [ $FILE_SIZE -ge "1000000000" ];
             then
               echo "The file size is greater than 100mb. Deleting the file."
               circleci-agent step halt

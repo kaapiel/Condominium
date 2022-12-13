@@ -14,11 +14,12 @@ jobs:
       - run:
           name: "Validate firebase bucket"
           command: |
-            export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items' | tr -d '"')
+            export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
             export FILE_SIZE=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/$SKP_FILE_NAME' | jq '.size' | tr -d '"')
             
             echo "File name: ${SKP_FILE_NAME}"
-
+            echo "File size: ${FILE_SIZE}"
+            
             if [[ $SKP_FILE_NAME == " " ]];
             then
               echo "The file contains special characters like spaces. Deleting the file."

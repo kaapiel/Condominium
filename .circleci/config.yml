@@ -20,7 +20,7 @@ jobs:
             echo "File name: ${SKP_FILE_NAME}"
             echo "File size: ${FILE_SIZE}"
             
-            if [ $FILE_SIZE -ge 1000000000 ];
+            if [ $FILE_SIZE -ge 100000000 ];
             then
               echo "The file size is greater than 100mb. Deleting the file."
               circleci-agent step halt

@@ -20,7 +20,7 @@ jobs:
             echo "File name: ${SKP_FILE_NAME}"
             echo "File size: ${FILE_SIZE}"
             
-            if [[ $SKP_FILE_NAME == " " ]];
+            if [[ $SKP_FILE_NAME == *" "* ]];
             then
               echo "The file contains special characters like spaces. Deleting the file."
               circleci-agent step halt

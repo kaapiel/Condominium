@@ -20,12 +20,6 @@ jobs:
             echo "File name: ${SKP_FILE_NAME}"
             echo "File size: ${FILE_SIZE}"
             
-            if [[ $SKP_FILE_NAME == *" "* ]];
-            then
-              echo "The file contains special characters like spaces. Deleting the file."
-              circleci-agent step halt
-            fi
-            
             if [[ $SKP_FILE_NAME == *['!()'@#\$%^\&*_+]* ]];
             then
               echo "The file contains special characters. Deleting the file."
@@ -55,7 +49,7 @@ jobs:
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
             export ASSET_NAMES=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq '.items[].name' | tr -d '"')
 
-            if [[ $SKP_FILE_NAME == " " ]];
+            if [[ $SKP_FILE_NAME == *" "* ]];
             then
               echo "The file contains special characters. Deleting the file."
               printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
@@ -65,7 +59,7 @@ jobs:
               circleci-agent step halt
             fi
             
-            if [[ $SKP_FILE_NAME == ['!'@#\$%^\&()_+]* ]];
+            if [[ $SKP_FILE_NAME == *['!()'@#\$%^\&*_+]* ]];
             then
               echo "The file contains special characters. Deleting the file."
               printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json

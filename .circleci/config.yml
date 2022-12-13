@@ -23,7 +23,7 @@ jobs:
               circleci-agent step halt
             fi
             
-            if [[ $SKP_FILE_NAME == *['!'@#\$%^\&*()_+]* ]];
+            if [[ $SKP_FILE_NAME == *['!()'@#\$%^\&*_+]* ]];
             then
               echo "The file contains special characters. Deleting the file."
               circleci-agent step halt

@@ -83,8 +83,8 @@ jobs:
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
             export SKP_FILE_TOKEN=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.downloadTokens' | tr -d '"')
             echo "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
-            echo "export FILE_NAME=$SKP_FILE_NAME" >> $BASH_ENV
-            curl -o "./Assets/${SKP_FILE_NAME%.*}${ANDROID_SUFIX}.${SKP_FILE_NAME##*.}" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
+            echo "export FILE_NAME=${SKP_FILE_NAME%.*}${ANDROID_SUFIX}.${SKP_FILE_NAME##*.}" >> $BASH_ENV
+            curl -o "./Assets/${FILE_NAME}" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
       - run:
           name: "Prepare Env"
           command: |
@@ -232,7 +232,7 @@ jobs:
             printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
             gcloud auth activate-service-account --key-file ./service-account.json
             rm ./service-account.json
-            curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${FILE_NAME}"
+            curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${FILE_NAME%.*}.${SKP_FILE_NAME##*.}"
 
   build-ios-asset-bundles:
     macos:
@@ -311,8 +311,8 @@ jobs:
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
             export SKP_FILE_TOKEN=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.downloadTokens' | tr -d '"')
             echo "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
-            echo "export FILE_NAME=$SKP_FILE_NAME" >> $BASH_ENV
-            curl -o "./Assets/${SKP_FILE_NAME%.*}${IOS_SUFIX}.${SKP_FILE_NAME##*.}" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
+            echo "export FILE_NAME=${SKP_FILE_NAME%.*}${IOS_SUFIX}.${SKP_FILE_NAME##*.}" >> $BASH_ENV
+            curl -o "./Assets/${FILE_NAME}" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
       - run:
           name: "Prepare Env"
           command: |
@@ -460,7 +460,7 @@ jobs:
             printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
             gcloud auth activate-service-account --key-file ./service-account.json
             rm ./service-account.json
-            curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${FILE_NAME}"
+            curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${FILE_NAME%.*}.${SKP_FILE_NAME##*.}"
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows

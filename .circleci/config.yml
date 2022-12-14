@@ -469,5 +469,5 @@ workflows:
       jobs:
         #- unity/create-activation-file:
         #    editor_version: '2021.3.1f1'
-        - build-ios-asset-bundles
         - build-android-asset-bundles
+        - build-ios-asset-bundles

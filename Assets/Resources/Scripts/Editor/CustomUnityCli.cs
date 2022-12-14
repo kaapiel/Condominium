@@ -10,7 +10,15 @@ public class CustomUnityCli : MonoBehaviour
     static void BuildAssetBundles()
     {
 
-        string file_name = GetArg("-executeMethod");
+        string file_name = GetFileNameArg("-executeMethod");
+        string platform_name = GetPlatformArg("-executeMethod");
+
+        if (!platform_name.Equals("Android") || !platform_name.Equals("iOS"))
+        {
+            Debug.Log("Platform name doesn't match. It must be Android or iOS. Found: " + platform_name);
+            return;
+        }
+
         string file_without_extension = System.IO.Path.GetFileNameWithoutExtension(file_name);
         Debug.Log("External file found: " + file_without_extension);
 
@@ -43,14 +51,37 @@ public class CustomUnityCli : MonoBehaviour
         UnityEditor.AssetImporter.GetAtPath(asset_path).SetAssetBundleNameAndVariant(file_without_extension, "");
         Debug.Log("Asset bundle name and variant set!");
 
-        //Build iOS asset bundles
-        Debug.Log("Building iOS asset bundle with BundleOptions NONE");
-        BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", BuildAssetBundleOptions.None, BuildTarget.iOS);
-        Debug.Log("iOS asset bundle built with BundleOption NONE");
+        //Build iOS/Android asset bundles
+        if (platform_name.Equals("Android"))
+        {
+            Debug.Log("Building Android asset bundle with BundleOptions NONE");
+            BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", BuildAssetBundleOptions.None, BuildTarget.Android);
+            Debug.Log("Android asset bundle built with BundleOption NONE");
+        } else if (platform_name.Equals("iOS"))
+        {
+            Debug.Log("Building iOS asset bundle with BundleOptions NONE");
+            BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", BuildAssetBundleOptions.None, BuildTarget.iOS);
+            Debug.Log("iOS asset bundle built with BundleOption NONE");
+        }
+        
     }
 
     // Helper function for getting the command line arguments
-    private static string GetArg(string name)
+    private static string GetFileNameArg(string name)
+    {
+        var args = System.Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length; i++)
+        {
+            if (args[i] == name && args.Length > i + 4)
+            {
+                return args[i + 4];
+            }
+        }
+        return null;
+    }
+
+    // Helper function for getting the command line arguments
+    private static string GetPlatformArg(string name)
     {
         var args = System.Environment.GetCommandLineArgs();
         for (int i = 0; i < args.Length; i++)

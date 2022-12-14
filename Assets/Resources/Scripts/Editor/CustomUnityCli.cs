@@ -13,7 +13,7 @@ public class CustomUnityCli : MonoBehaviour
         string file_name = GetFileNameArg("-executeMethod");
         string platform_name = GetPlatformArg("-executeMethod");
 
-        if (!platform_name.Equals("Android") || !platform_name.Equals("iOS"))
+        if (!platform_name.Equals("Android") && !platform_name.Equals("iOS"))
         {
             Debug.Log("Platform name doesn't match. It must be Android or iOS. Found: " + platform_name);
             return;

@@ -6,7 +6,7 @@ orbs:
   unity: game-ci/unity@1.3.0
 
 jobs:
-  run-command:
+  build-android-asset-bundles:
     macos:
       xcode: 12.5.1
     resource_class: medium
@@ -14,18 +14,12 @@ jobs:
       - run:
           name: "Validate firebase bucket"
           command: |
+            echo "export ANDROID_SUFIX=_android" >> $BASH_ENV
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items' | tr -d '"')
-            export FILE_SIZE=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/$SKP_FILE_NAME' | jq '.size' | tr -d '"')
             
-            if [ $FILE_SIZE -ge 1000000000 ];
-            then
-              echo "The file size is greater than 100mb"
-              circleci-agent step halt
-            fi
-
             if [ "$SKP_FILE_NAME" == "[]" ]; 
             then
-              echo "There is no file in the repository, finishing job..."
+              echo "There are no files in the repository, finishing job..."
               circleci-agent step halt
             else
               echo "There are files in the repository, resuming job..."
@@ -38,9 +32,268 @@ jobs:
           name: "Validate external file name"
           command: |
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
+            export FILE_SIZE=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.size' | tr -d '"')
             export ASSET_NAMES=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq '.items[].name' | tr -d '"')
 
-            if [[ $ASSET_NAMES == *"${SKP_FILE_NAME%.*}"* ]]; 
+            if [[ $SKP_FILE_NAME == *" "* ]];
+            then
+              echo "The file contains special characters. Deleting the file."
+              printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
+              gcloud auth activate-service-account --key-file ./service-account.json
+              rm ./service-account.json
+              curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}"
+              circleci-agent step halt
+            fi
+            
+            if [[ $SKP_FILE_NAME == *['!()'@#\$%^\&*+]* ]];
+            then
+              echo "The file contains special characters. Deleting the file."
+              printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
+              gcloud auth activate-service-account --key-file ./service-account.json
+              rm ./service-account.json
+              curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}"
+              circleci-agent step halt
+            fi
+            
+            if [ $FILE_SIZE -ge 100000000 ];
+            then
+              echo "The file size is greater than 100mb. Deleting the file."
+              printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
+              gcloud auth activate-service-account --key-file ./service-account.json
+              rm ./service-account.json
+              curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}"
+              circleci-agent step halt
+            fi
+
+            if [[ $ASSET_NAMES == "${SKP_FILE_NAME}_%.*}"* ]]; 
+            then
+              echo "There is an asset with the same name as this external file. Deleting the file and finishing the job..."
+              printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
+              gcloud auth activate-service-account --key-file ./service-account.json
+              rm ./service-account.json
+              curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}"
+              circleci-agent step halt
+            else
+              echo "There are no assets with same name as this external file, resuming job..."
+            fi
+      - checkout
+      - run:
+          name: "Downloading external file"
+          command: |
+            export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
+            export SKP_FILE_TOKEN=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.downloadTokens' | tr -d '"')
+            echo "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
+            echo "export FILE_NAME=$SKP_FILE_NAME" >> $BASH_ENV
+            curl -o "./Assets/$SKP_FILE_NAME" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
+      - run:
+          name: "Prepare Env"
+          command: |
+            readonly unity_hub_path="/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"
+            readonly unity_editor_path="/Applications/Unity/Hub/Editor/2021.3.1f1/Unity.app/Contents/MacOS/Unity"
+            
+            printf '%s\n' "export UNITY_HUB_PATH=\"$unity_hub_path\"" >> "$BASH_ENV"
+            printf '%s\n' "export UNITY_EDITOR_PATH=$unity_editor_path" >> "$BASH_ENV"
+            check_and_install_unity_hub() {
+              if [ ! -f "$unity_hub_path" ]; then
+                printf '%s\n' "Could not find Unity Hub at \"$unity_hub_path\"."
+                printf '%s\n' "Installing it with brew..."
+                brew install --cask unity-hub
+                if [ -f "$unity_hub_path" ]; then
+                  printf '%s\n' "Unity Hub installed successfully."
+                else
+                  printf '%s\n' "Could not install the Unity Hub."
+                  printf '%s\n' "Please try again or open an issue."
+                  return 1
+                fi
+              fi
+              return 0
+            }
+            check_and_install_unity_editor() {
+              if [ ! -f "$unity_editor_path" ]; then
+                printf '%s\n' "Could not find the Unity Editor at \"$unity_editor_path\"."
+                printf '%s\n' "Installing it with the Unity Hub..."
+                if check_and_install_unity_hub; then
+                  if ! command -v npm &> /dev/null; then
+                    printf '%s\n' "npm is required to fetch the Unity Editor changeset."
+                    printf '%s\n' "Please install it and try again."
+                    return 1
+                  fi
+                  changeset="$(npx unity-changeset "2021.3.1f1")"
+                  set -x
+                  "$unity_hub_path" -- --headless install --version "2021.3.1f1" --changeset "3b70a0754835" --module mac-il2cpp android --childModules
+                  set +x
+                  if [ -f "$unity_editor_path" ]; then
+                    printf '%s\n' "Unity Editor installed successfully."
+                  else
+                    printf '%s\n' "Could not install the Unity Editor."
+                    printf '%s\n' "Please try again or open an issue."
+                    return 1
+                  fi
+                else
+                  printf '%s\n' "Could not install the Editor because Unity Hub is not installed."
+                  return 1
+                fi
+              fi
+              return 0
+            }
+            resolve_unity_serial() {
+              if [ -n "$UNITY_USERNAME" ] && [ -n "$UNITY_PASSWORD" ]; then
+                # Serial provided.
+                if [ -n "$unity_serial" ]; then
+                  printf '%s\n' "Detected Unity serial."
+                  readonly resolved_unity_serial="$unity_serial"
+                # License provided.
+                elif [ -n "$UNITY_ENCODED_LICENSE" ]; then
+                  printf '%s\n' "No serial detected. Extracting it from the encoded license."
+                  
+                  if ! extract_serial_from_license; then
+                    printf '%s\n' "Failed to parse the serial from the Unity license."
+                    printf '%s\n' "Please try again or open an issue."
+                    printf '%s\n' "See the docs for more details: https://game.ci/docs/circleci/activation#personal-license"
+                    return 1
+                  
+                  else
+                    readonly resolved_unity_serial="$decoded_unity_serial"
+                    printf '%s\n' "export RESOLVED_UNITY_SERIAL=$resolved_unity_serial" >> "$BASH_ENV"
+                  fi
+                # Nothing provided.
+                else
+                  printf '%s\n' "No serial or encoded license found."
+                  printf '%s\n' "Please run the script again with a serial or encoded license file."
+                  printf '%s\n' "See the docs for more details: https://game.ci/docs/circleci/activation"
+                  return 1
+                fi
+              fi
+              return 0
+            }
+            extract_serial_from_license() {
+              # Fix locale setting in PERL.
+              # https://stackoverflow.com/a/7413863
+              export LC_CTYPE=en_US.UTF-8
+              export LC_ALL=en_US.UTF-8 
+              local unity_license
+              local developer_data
+              local encoded_serial
+              unity_license="$(base64 --decode \<<< "$UNITY_ENCODED_LICENSE")"
+              developer_data="$(perl -nle 'print $& while m{<DeveloperData Value\="\K.*?(?="/>)}g' \<<< "$unity_license")"
+              encoded_serial="$(cut -c 5- \<<< "$developer_data")"
+              
+              decoded_unity_serial="$(base64 --decode \<<< "$encoded_serial")"
+              readonly decoded_unity_serial
+              if [ -n "$decoded_unity_serial" ]; then return 0; else return 1; fi
+            }
+            # Install the Editor if not already installed.
+            if ! check_and_install_unity_editor; then
+              printf '%s\n' "Something went wrong."
+              printf '%s\n' "Please try again or open an issue."
+              exit 1
+            fi
+            # Check if serial or encoded license was provided.
+            # If the latter, extract the serial from the license.
+            if ! resolve_unity_serial; then
+              printf '%s\n' "Failed to find the serial or parse it from the Unity license."
+              printf '%s\n' "Please try again or open an issue."
+              exit 1
+            fi
+            # If it doesn't exist, create folder for the Unity License File.
+            readonly unity_license_file_path="/Library/Application Support/Unity"
+            sudo mkdir -p "$unity_license_file_path"
+            sudo chmod -R 777 "$unity_license_file_path"
+            # Activate the Unity Editor.
+            set -x
+            "$unity_editor_path" \
+              -batchmode \
+              -quit \
+              -nographics \
+              -username "$UNITY_USERNAME" \
+              -password "$UNITY_PASSWORD" \
+              -serial "$resolved_unity_serial" \
+              -logfile /dev/stdout
+            set +x
+      - run:
+          name: "Build Asset Bundles"
+          command: |
+            /Applications/Unity/Hub/Editor/2021.3.1f1/Unity.app/Contents/MacOS/Unity -projectPath . -quit -batchmode -nographics -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" -serial "$RESOLVED_UNITY_SERIAL" -stackTraceLogType 'Script Only' -executeMethod CustomUnityCli.BuildAssetBundles -logFile /dev/stdout "$FILE_NAME" "Android"
+            echo ""
+      - store_artifacts:
+          path: ./Assets/StreamingAssets
+      - run:
+          name: "Upload asset bundles to firebase bucket"
+          command: |
+            echo "Uploading assetbundle to firebase bucket"
+            printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE" | base64 --decode >> ./service-account.json
+            gcloud auth activate-service-account --key-file ./service-account.json
+            rm ./service-account.json
+            curl -X POST --data-binary @"./Assets/StreamingAssets/${FILE_NAME%.*}" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-assetbundles.appspot.com/o?uploadType=media&name=${FILE_NAME%.*}${ANDROID_SUFIX}"
+      - run:
+          name: "Delete external file from firebase bucket"
+          command: |
+            echo "Deleting external file from firebase bucket"
+            printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
+            gcloud auth activate-service-account --key-file ./service-account.json
+            rm ./service-account.json
+            curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${FILE_NAME}"
+
+  build-ios-asset-bundles:
+    macos:
+      xcode: 12.5.1
+    resource_class: medium
+    steps:
+      - run:
+          name: "Validate firebase bucket"
+          command: |
+            echo "export IOS_SUFIX=_ios" >> $BASH_ENV
+            export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items' | tr -d '"')
+            
+            if [ "$SKP_FILE_NAME" == "[]" ]; 
+            then
+              echo "There are no files in the repository, finishing job..."
+              circleci-agent step halt
+            else
+              echo "There are files in the repository, resuming job..."
+            fi
+      - run:
+          name: "Install Google Cloud sdk"
+          command: |
+            brew install --cask google-cloud-sdk
+      - run:
+          name: "Validate external file name"
+          command: |
+            export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
+            export FILE_SIZE=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.size' | tr -d '"')
+            export ASSET_NAMES=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq '.items[].name' | tr -d '"')
+
+            if [[ $SKP_FILE_NAME == *" "* ]];
+            then
+              echo "The file contains special characters. Deleting the file."
+              printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
+              gcloud auth activate-service-account --key-file ./service-account.json
+              rm ./service-account.json
+              curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}"
+              circleci-agent step halt
+            fi
+            
+            if [[ $SKP_FILE_NAME == *['!()'@#\$%^\&*+]* ]];
+            then
+              echo "The file contains special characters. Deleting the file."
+              printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
+              gcloud auth activate-service-account --key-file ./service-account.json
+              rm ./service-account.json
+              curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}"
+              circleci-agent step halt
+            fi
+            
+            if [ $FILE_SIZE -ge 100000000 ];
+            then
+              echo "The file size is greater than 100mb. Deleting the file."
+              printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
+              gcloud auth activate-service-account --key-file ./service-account.json
+              rm ./service-account.json
+              curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}"
+              circleci-agent step halt
+            fi
+
+            if [[ $ASSET_NAMES == "${SKP_FILE_NAME}_%.*}"* ]]; 
             then
               echo "There is an asset with the same name as this external file. Deleting the file and finishing the job..."
               printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
@@ -188,7 +441,7 @@ jobs:
       - run:
           name: "Build Asset Bundles"
           command: |
-            /Applications/Unity/Hub/Editor/2021.3.1f1/Unity.app/Contents/MacOS/Unity -projectPath . -quit -batchmode -nographics -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" -serial "$RESOLVED_UNITY_SERIAL" -stackTraceLogType 'Script Only' -executeMethod CustomUnityCli.BuildAssetBundles -logFile /dev/stdout "$FILE_NAME"
+            /Applications/Unity/Hub/Editor/2021.3.1f1/Unity.app/Contents/MacOS/Unity -projectPath . -quit -batchmode -nographics -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" -serial "$RESOLVED_UNITY_SERIAL" -stackTraceLogType 'Script Only' -executeMethod CustomUnityCli.BuildAssetBundles -logFile /dev/stdout "$FILE_NAME" "iOS"
             echo ""
       - store_artifacts:
           path: ./Assets/StreamingAssets
@@ -199,7 +452,7 @@ jobs:
             printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE" | base64 --decode >> ./service-account.json
             gcloud auth activate-service-account --key-file ./service-account.json
             rm ./service-account.json
-            curl -X POST --data-binary @"./Assets/StreamingAssets/${FILE_NAME%.*}" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-assetbundles.appspot.com/o?uploadType=media&name=${FILE_NAME%.*}"
+            curl -X POST --data-binary @"./Assets/StreamingAssets/${FILE_NAME%.*}" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-assetbundles.appspot.com/o?uploadType=media&name=${FILE_NAME%.*}${IOS_SUFIX}"
       - run:
           name: "Delete external file from firebase bucket"
           command: |
@@ -216,4 +469,5 @@ workflows:
       jobs:
         #- unity/create-activation-file:
         #    editor_version: '2021.3.1f1'
-        - run-command
+        - build-ios-asset-bundles
+        - build-android-asset-bundles

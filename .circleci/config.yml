@@ -313,7 +313,7 @@ jobs:
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
             export SKP_FILE_TOKEN=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.downloadTokens' | tr -d '"')
             echo "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
-            export FILE_NAME=${SKP_FILE_NAME%.*}${ANDROID_SUFIX}.${SKP_FILE_NAME##*.}
+            export FILE_NAME=${SKP_FILE_NAME%.*}${IOS_SUFIX}.${SKP_FILE_NAME##*.}
             echo $FILE_NAME
             echo "export FILE_NAME=${FILE_NAME}" >> $BASH_ENV
             curl -o "./Assets/${FILE_NAME}" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"

@@ -18,14 +18,10 @@ jobs:
       - run:
           name: "Validate firebase bucket"
           command: |
-            echo <<parameters.platform>>
-            echo << parameters.platform >>
-            echo "Hi <<parameters.platform>>"
-            echo "Hi << parameters.platform >>"
-            echo "Hi " <<parameters.platform>>
-            echo "Hi " << parameters.platform >>
-
-            echo "export IOS_SUFIX=_ios" >> $BASH_ENV
+            export IOS_SUFIX=_<<parameters.platform>>
+            echo ${IOS_SUFIX}
+            
+            echo "export IOS_SUFIX=_<<parameters.platform>>" >> $BASH_ENV
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items' | tr -d '"')
             
             if [ "$SKP_FILE_NAME" == "[]" ]; 
@@ -226,7 +222,7 @@ jobs:
       - run:
           name: "Build Asset Bundles"
           command: |
-            /Applications/Unity/Hub/Editor/2021.3.1f1/Unity.app/Contents/MacOS/Unity -projectPath . -quit -batchmode -nographics -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" -serial "$RESOLVED_UNITY_SERIAL" -stackTraceLogType 'Script Only' -executeMethod CustomUnityCli.BuildAssetBundles -logFile /dev/stdout "$FILE_NAME" "iOS"
+            /Applications/Unity/Hub/Editor/2021.3.1f1/Unity.app/Contents/MacOS/Unity -projectPath . -quit -batchmode -nographics -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" -serial "$RESOLVED_UNITY_SERIAL" -stackTraceLogType 'Script Only' -executeMethod CustomUnityCli.BuildAssetBundles -logFile /dev/stdout "$FILE_NAME" "<<parameters.platform>>"
             echo ""
       - store_artifacts:
           path: ./Assets/StreamingAssets

@@ -18,9 +18,6 @@ jobs:
       - run:
           name: "Validate firebase bucket"
           command: |
-            export IOS_SUFIX=_<<parameters.platform>>
-            echo ${IOS_SUFIX}
-            
             echo "export IOS_SUFIX=_<<parameters.platform>>" >> $BASH_ENV
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items' | tr -d '"')
             

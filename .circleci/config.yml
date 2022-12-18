@@ -280,14 +280,13 @@ workflows:
   generate-asset-bundle-workflow:
       jobs:
         - build-asset-bundles:
-            name: Android
+            name: "Build Android Asset Bundles"
             platform: "Android"
         - build-asset-bundles:
-            name: iOS
+            name: "Build iOS Asset Bundles"
             platform: "iOS"
             requires: 
-              - Android
+              - "Build Android Asset Bundles"
         - tear-down:
             requires:
-              - iOS
-        
+              - "Build iOS Asset Bundles"

@@ -248,6 +248,19 @@ jobs:
     resource_class: medium
     steps:
       - run:
+          name: "Validate original files"
+          command: |
+            export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items' | tr -d '"')
+            
+            if [ "$SKP_FILE_NAME" == "[]" ]; 
+            then
+              echo "There are no files in the repository, finishing job..."
+              circleci-agent step halt
+            else
+              echo "There are files in the repository, resuming job..."
+            fi
+
+      - run:
           name: "Install Google Cloud sdk"
           command: |
             brew install --cask google-cloud-sdk

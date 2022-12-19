@@ -44,7 +44,7 @@ jobs:
               echo "There are files in the repository, resuming job..."
             fi
       - restore_cache:
-          key: unity_cache
+          key: unity-editor-cache 
       - run:
           name: "Install Google Cloud sdk"
           command: |
@@ -241,7 +241,7 @@ jobs:
       - save_cache:
           paths:
             - "/usr/local/Applications/"
-          key: unity_cache
+          key: unity-editor-cache
       - store_artifacts:
           path: ./Assets/StreamingAssets
       - run:
@@ -269,8 +269,6 @@ jobs:
             else
               echo "There are files in the repository, resuming job..."
             fi
-      - restore_cache:
-          key: unity_cache
       - run:
           name: "Install Google Cloud sdk"
           command: |

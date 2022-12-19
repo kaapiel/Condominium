@@ -244,15 +244,15 @@ jobs:
             echo ""
       - save_cache:
           paths:
-            - ""
+            - "./Assets/StreamingAssets"
           key: unity-editor
       - save_cache:
           paths:
-            - ""
+            - "./Assets/StreamingAssets"
           key: unity-hub
       - save_cache:
           paths:
-            - ""
+            - "./Assets/StreamingAssets"
           key: google-cloud-sdk
       - store_artifacts:
           path: ./Assets/StreamingAssets

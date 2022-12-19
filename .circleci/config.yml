@@ -43,6 +43,8 @@ jobs:
             else
               echo "There are files in the repository, resuming job..."
             fi
+      - restore_cache:
+          key: unity_cache
       - run:
           name: "Install Google Cloud sdk"
           command: |
@@ -236,6 +238,12 @@ jobs:
           command: |
             /Applications/Unity/Hub/Editor/2021.3.1f1/Unity.app/Contents/MacOS/Unity -projectPath . -quit -batchmode -nographics -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" -serial "$RESOLVED_UNITY_SERIAL" -stackTraceLogType 'Script Only' -executeMethod CustomUnityCli.BuildAssetBundles -logFile /dev/stdout "$FILE_NAME" "<<parameters.platform>>"
             echo ""
+      - save_cache:
+          paths:
+            - "/Users/distiller/Applications/"
+            - "/Users/distiller/Library/Caches/Homebrew"
+            - "/Users/distiller/Homebrew"
+          key: unity_cache
       - store_artifacts:
           path: ./Assets/StreamingAssets
       - run:

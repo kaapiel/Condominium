@@ -5,15 +5,20 @@ version: 2.1
 orbs:
   unity: game-ci/unity@1.3.0
 
+executors:
+  macos-executor:
+    macos:
+      xcode: 12.5.1
+    resource_class: medium
+
 jobs:
   build-asset-bundles:
     parameters:
       platform:
         type: string
         default: ""
-    macos:
-      xcode: 12.5.1
-    resource_class: medium
+    executor:
+      macos-executor
     steps:
       - run:
           name: "Validate firebase bucket"
@@ -243,9 +248,8 @@ jobs:
             curl -X POST --data-binary @"./Assets/StreamingAssets/${FILE_NAME%.*}" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/${PLATFORM_BUCKET}.appspot.com/o?uploadType=media&name=${FILE_NAME%.*}"
 
   tear-down:
-    macos:
-      xcode: 12.5.1
-    resource_class: medium
+    executor:
+      macos-executor
     steps:
       - run:
           name: "Validate original files"

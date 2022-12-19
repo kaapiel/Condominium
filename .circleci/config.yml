@@ -240,11 +240,7 @@ jobs:
             echo ""
       - save_cache:
           paths:
-            - "/Users/distiller/Applications/"
-            - "/Users/distiller/Library/Caches/Homebrew"
-            - "/Users/distiller/Homebrew"
-            - "/usr/local/Homebrew/"
-            - "/usr/local/Cellar/"
+            - "/usr/local/Applications/"
           key: unity_cache
       - store_artifacts:
           path: ./Assets/StreamingAssets

@@ -21,6 +21,30 @@ jobs:
       macos-executor
     steps:
       - run:
+          name: "Test step"
+          command: |
+            echo "Platform iOS"
+            printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE" | base64 --decode
+            echo ""
+
+            echo "Platform Android"
+            printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE_ANDROID" | base64 --decode
+            echo ""
+
+            echo "Testing permissions for iOS bucket"
+            printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE" | base64 --decode >> ./service-account.json
+            gcloud auth activate-service-account --key-file ./service-account.json
+            rm ./service-account.json
+            curl -X POST --data-binary @"./Assets/StreamingAssets/doesntexists" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-assetbundles.appspot.com/o?uploadType=media&name=doesntexists.lol"
+
+            echo "Testing permissions for Android bucket"
+            printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE_ANDROID" | base64 --decode >> ./service-account.json
+            gcloud auth activate-service-account --key-file ./service-account.json
+            rm ./service-account.json
+            curl -X POST --data-binary @"./Assets/StreamingAssets/doesntexists" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/condominium-asetbundle-android.appspot.com/o?uploadType=media&name=doesntexists.lol"
+
+            circleci-agent step halt
+      - run:
           name: "Validate firebase bucket"
           command: |
             echo "export IOS_SUFIX=_<<parameters.platform>>" >> $BASH_ENV
@@ -260,7 +284,17 @@ jobs:
           name: "Upload asset bundles to firebase bucket"
           command: |
             echo "Uploading assetbundle to firebase bucket"
-            printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE" | base64 --decode >> ./service-account.json
+            
+            if [[ <<parameters.platform>> == "iOS" ]];
+            then
+              printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE" | base64 --decode >> ./service-account.json
+            fi
+
+            if [[ <<parameters.platform>> == "Android" ]];
+            then
+              printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE_ANDROID" | base64 --decode >> ./service-account.json
+            fi
+
             gcloud auth activate-service-account --key-file ./service-account.json
             rm ./service-account.json
             curl -X POST --data-binary @"./Assets/StreamingAssets/${FILE_NAME%.*}" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/${PLATFORM_BUCKET}.appspot.com/o?uploadType=media&name=${FILE_NAME%.*}"

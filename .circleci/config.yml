@@ -23,13 +23,7 @@ jobs:
       - run:
           name: "Test step"
           command: |
-            echo "Platform iOS"
-            printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE" | base64 --decode
-            echo ""
-
-            echo "Platform Android"
-            printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE_ANDROID" | base64 --decode
-            echo ""
+            brew install --cask google-cloud-sdk
 
             echo "Testing permissions for iOS bucket"
             printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE" | base64 --decode >> ./service-account.json

@@ -38,8 +38,6 @@ jobs:
               echo "export PLATFORM_BUCKET=${PLATFORM_BUCKET}" >> $BASH_ENV
             fi
             
-            echo ${PLATFORM_BUCKET}
-            echo "https://firebasestorage.googleapis.com/v0/b/${PLATFORM_BUCKET}.appspot.com/o/"
             export ASSET_NAMES=$(curl -s "https://firebasestorage.googleapis.com/v0/b/${PLATFORM_BUCKET}.appspot.com/o/" | jq '.items[].name')
             
             if [ "$SKP_FILE_NAMES" == "[]" ]; 

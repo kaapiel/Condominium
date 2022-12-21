@@ -298,9 +298,8 @@ workflows:
         - build-asset-bundles:
             name: "Build iOS Asset Bundles"
             platform: "iOS"
-            requires: 
-              - "Build Android Asset Bundles"
         - tear-down:
             name: "Tear Down "
             requires:
               - "Build iOS Asset Bundles"
+              - "Build Android Asset Bundles"

@@ -36,7 +36,7 @@ jobs:
               echo "export PLATFORM_BUCKET=condominium-asetbundle-android" >> $BASH_ENV
             fi
 
-            export ASSET_NAMES=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/${PLATFORM_BUCKET}.appspot.com/o/' | jq '.items[].name')
+            export ASSET_NAMES=$(curl -s "https://firebasestorage.googleapis.com/v0/b/${PLATFORM_BUCKET}.appspot.com/o/" | jq '.items[].name')
 
             if [ "$SKP_FILE_NAMES" == "[]" ]; 
             then

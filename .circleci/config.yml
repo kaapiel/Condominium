@@ -23,7 +23,7 @@ jobs:
       - run:
           name: "Validate firebase bucket"
           command: |
-            export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items' | tr -d '"')
+            export SKP_FILE_NAMES=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items' | tr -d '"')
             
             if [[ <<parameters.platform>> == "iOS" ]];
             then
@@ -35,7 +35,7 @@ jobs:
               echo "export PLATFORM_BUCKET=condominium-asetbundle-android" >> $BASH_ENV
             fi
 
-            if [ "$SKP_FILE_NAME" == "[]" ]; 
+            if [ "$SKP_FILE_NAMES" == "[]" ]; 
             then
               echo "There are no files in the repository, finishing job..."
               circleci-agent step halt
@@ -51,6 +51,7 @@ jobs:
           name: "Validate external file name"
           command: |
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
+            echo "export SKP_FILE_NAME=${SKP_FILE_NAME}" >> $BASH_ENV
             export FILE_SIZE=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.size' | tr -d '"')
             export ASSET_NAMES=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/${PLATFORM_BUCKET}.appspot.com/o/' | jq '.items[].name' | tr -d '"')
 
@@ -99,13 +100,9 @@ jobs:
       - run:
           name: "Downloading external file"
           command: |
-            export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
             export SKP_FILE_TOKEN=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.downloadTokens' | tr -d '"')
             echo "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
-            export FILE_NAME=${SKP_FILE_NAME%.*}.${SKP_FILE_NAME##*.}
-            echo $FILE_NAME
-            echo "export FILE_NAME=${FILE_NAME}" >> $BASH_ENV
-            curl -o "./Assets/${FILE_NAME}" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
+            curl -o "./Assets/${SKP_FILE_NAME}" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
       - run:
           name: "Prepare Env"
           command: |
@@ -235,7 +232,7 @@ jobs:
       - run:
           name: "Build Asset Bundles"
           command: |
-            /Applications/Unity/Hub/Editor/2021.3.1f1/Unity.app/Contents/MacOS/Unity -projectPath . -quit -batchmode -nographics -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" -serial "$RESOLVED_UNITY_SERIAL" -stackTraceLogType 'Script Only' -executeMethod CustomUnityCli.BuildAssetBundles -logFile /dev/stdout "$FILE_NAME" "<<parameters.platform>>"
+            /Applications/Unity/Hub/Editor/2021.3.1f1/Unity.app/Contents/MacOS/Unity -projectPath . -quit -batchmode -nographics -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" -serial "$RESOLVED_UNITY_SERIAL" -stackTraceLogType 'Script Only' -executeMethod CustomUnityCli.BuildAssetBundles -logFile /dev/stdout "$SKP_FILE_NAME" "<<parameters.platform>>"
             echo ""
       - store_artifacts:
           path: ./Assets/StreamingAssets
@@ -256,7 +253,7 @@ jobs:
 
             gcloud auth activate-service-account --key-file ./service-account.json
             rm ./service-account.json
-            curl -X POST --data-binary @"./Assets/StreamingAssets/${FILE_NAME%.*}" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/${PLATFORM_BUCKET}.appspot.com/o?uploadType=media&name=${FILE_NAME%.*}"
+            curl -X POST --data-binary @"./Assets/StreamingAssets/${SKP_FILE_NAME%.*}" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/octet-stream" "https://storage.googleapis.com/upload/storage/v1/b/${PLATFORM_BUCKET}.appspot.com/o?uploadType=media&name=${SKP_FILE_NAME%.*}"
 
   tear-down:
     executor:

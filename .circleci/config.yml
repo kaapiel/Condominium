@@ -28,14 +28,13 @@ jobs:
             
             if [[ <<parameters.platform>> == "iOS" ]];
             then
-              echo "Hello"
               echo "export PLATFORM_BUCKET=condominium-assetbundles" >> $BASH_ENV
             fi
 
             if [[ <<parameters.platform>> == "Android" ]];
             then
-              echo "Hello???"
               echo "export PLATFORM_BUCKET=condominium-asetbundle-android" >> $BASH_ENV
+              echo "${PLATFORM_BUCKET}"
             fi
             
             echo ${PLATFORM_BUCKET}

@@ -85,13 +85,10 @@ jobs:
               circleci-agent step halt
             fi
 
+            # We don't delete the file here because it is possible to the next bucket do not have this asset bundle yet
             if [[ $ASSET_NAMES == "${SKP_FILE_NAME%.*}"* ]]; 
             then
-              echo "There is an asset with the same name as this external file. Deleting the file and finishing the job..."
-              printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
-              gcloud auth activate-service-account --key-file ./service-account.json
-              rm ./service-account.json
-              curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}"
+              echo "There is an asset with the same name as this external file. Skipping job..."
               circleci-agent step halt
             else
               echo "There are no assets with same name as this external file, resuming job..."

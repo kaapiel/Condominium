@@ -24,13 +24,39 @@ public class CondominiumCustomScripts : MonoBehaviour
     [MenuItem("Condominium/Build AssetBundles")]
     static void BuildAssetBundles()
     {
+        //string fileName = "/Assets/Resources/Models/DW06_copy.skp";
+        //string file_without_extension = System.IO.Path.GetFileNameWithoutExtension(fileName);
+
+        //string guid = AssetDatabase.FindAssets(fileName, null)[0];
+        //Debug.Log("Asset GUID found: " + guid);
+
+        ////Retrieve file path from GUID
+        //Debug.Log("Retrieving asset path from asset GUID");
+        //string asset_path = AssetDatabase.GUIDToAssetPath(guid);
+        //Debug.Log("Asset path retrieved: " + asset_path);
+
+        //Debug.Log("Extracting textures...");
+        //ModelImporter modelImporter = AssetImporter.GetAtPath(asset_path) as ModelImporter;
+        //modelImporter.isReadable = true;
+        //modelImporter.ExtractTextures("Assets/Textures/");
+        //Debug.Log("Extracting textures finished");
+
+        ////Import asset into project
+        //Debug.Log("External file import started...");
+        //AssetDatabase.ImportAsset(asset_path);
+        //Debug.Log("External file import finished!");
+
+        ////Set bundle name into prefab
+        //UnityEditor.AssetImporter.GetAtPath(asset_path).SetAssetBundleNameAndVariant(file_without_extension, "");
+        //Debug.Log("Asset bundle name and variant set!");
+
         string assetsBundleDirectory = "Assets/StreamingAssets";
         if (!Directory.Exists(Application.streamingAssetsPath))
         {
             Directory.CreateDirectory(assetsBundleDirectory);
         }
 
-        BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", BuildAssetBundleOptions.None, BuildTarget.Android);
+        BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", BuildAssetBundleOptions.None, BuildTarget.iOS);
 
     }
 

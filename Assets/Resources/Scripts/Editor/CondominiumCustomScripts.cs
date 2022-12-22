@@ -13,6 +13,7 @@ using System.Reflection;
 using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
+using System;
 
 public class CondominiumCustomScripts : MonoBehaviour
 {
@@ -29,7 +30,7 @@ public class CondominiumCustomScripts : MonoBehaviour
             Directory.CreateDirectory(assetsBundleDirectory);
         }
 
-        BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", BuildAssetBundleOptions.None, BuildTarget.iOS);
+        BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", BuildAssetBundleOptions.None, BuildTarget.Android);
 
     }
 
@@ -210,10 +211,11 @@ public class CondominiumCustomScripts : MonoBehaviour
         //This is all the children (sub gameobjects)
         foreach (Transform child in trans)
         {
-            if (child.name.Contains("Door") ||
-                    child.name.Contains("Window") ||
-                    child.name.Contains("animation") ||
-                    child.name.Contains("WaterPlane"))
+            if (child.name.Contains("Door", StringComparison.OrdinalIgnoreCase) ||
+                    child.name.Contains("Window", StringComparison.OrdinalIgnoreCase) ||
+                    child.name.Contains("Animation", StringComparison.OrdinalIgnoreCase) ||
+                    child.name.Contains("Water", StringComparison.OrdinalIgnoreCase) ||
+                    child.name.Contains("Glass", StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }

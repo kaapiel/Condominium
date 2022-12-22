@@ -4,20 +4,29 @@ using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
 using System;
-using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 
-using TMPro;
 using System.Reflection;
 
 namespace SlimUI.ModernMenu{
 	
 	public class CheckMusicVolume : MonoBehaviour {
         
-        private string baseUrl = "https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/";
+        private string baseUrl = "";
 		
 		public void  Start (){
+
+#if UNITY_IPHONE
+	Debug.Log("iPhone platform found");
+	baseUrl = "https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/";
+#endif
+
+#if UNITY_ANDROID
+	Debug.Log("Android platform found");
+	baseUrl = "https://firebasestorage.googleapis.com/v0/b/condominium-asetbundle-android.appspot.com/o/";
+#endif
+
 			// remember volume level from last time
 			GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat("MusicVolume");
 			StartCoroutine(DownloadAssetBundles());
@@ -272,10 +281,11 @@ namespace SlimUI.ModernMenu{
 			//This are all the children (sub gameobjects)
 			foreach (Transform child in trans)
 			{
-				if (child.name.Contains("Door") ||
-					child.name.Contains("Window") ||
-					child.name.Contains("animation") ||
-					child.name.Contains("WaterPlane"))
+				if (child.name.Contains("Door", StringComparison.OrdinalIgnoreCase) ||
+					child.name.Contains("Window", StringComparison.OrdinalIgnoreCase) ||
+					child.name.Contains("Animation", StringComparison.OrdinalIgnoreCase) ||
+					child.name.Contains("Water", StringComparison.OrdinalIgnoreCase) ||
+					child.name.Contains("Glass", StringComparison.OrdinalIgnoreCase))
 				{
 					continue;
 				}

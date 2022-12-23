@@ -237,17 +237,11 @@ jobs:
             else
               echo "There are no assets with same name as this external file, resuming job..."
             fi
-      
       - restore_cache:
           keys: 
-            - "google-cloud-sdk-cache-key"
+            - "gc-sdk-cache-key"
             - "unity-hub-cache-key"
-            - "unity-editot-cache-key"
-      
-      - run:
-          name: "Install Google Cloud sdk"
-          command: |
-            brew install --cask google-cloud-sdk
+            - "unity-editot-cache-key" 
       - run:
           name: "Validate external file name"
           command: |

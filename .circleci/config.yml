@@ -174,7 +174,8 @@ jobs:
             - "/usr/local/bin/gcloud"
             - "/usr/local/bin/bq"
             - "/usr/local/bin/gsutil"
-          key: "b"
+            - "/usr/local/Caskroom/google-cloud-sdk"
+          key: "c"
       - save_cache:
           paths:
             - "Unity Hub installation path"
@@ -440,7 +441,7 @@ jobs:
       macos-executor
     steps:
       - restore_cache:
-          key: "b"
+          key: "c"
       #- run:
       #    name: "Validate original files"
       #    command: |

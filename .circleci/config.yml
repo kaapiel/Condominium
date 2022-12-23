@@ -41,9 +41,6 @@ jobs:
           name: "Install Google Cloud SDK"
           command: |
             brew install --cask google-cloud-sdk
-
-            echo "cd ../../../ && cd usr && cd local && cd Cellar && ls"
-            cd ../../../ && cd usr && cd local && cd Cellar && ls
       - run:
           name: "Install Unity Hub and Unity Editor"
           command: |
@@ -173,8 +170,14 @@ jobs:
           #  set +x
       - save_cache:
           paths:
-            - "/usr/local/Cellar/"
-          key: "aaa"
+            - "/usr/local/Cellar/ca-certificates/"
+            - "/usr/local/Cellar/gdbm/"
+            - "/usr/local/Cellar/openssl@1.1/"
+            - "/usr/local/Cellar/readline/"
+            - "/usr/local/Cellar/sqlite/"
+            - "/usr/local/Cellar/xz/"
+            - "/usr/local/Cellar/python@3.10/"
+          key: "aa"
       - save_cache:
           paths:
             - "Unity Hub installation path"
@@ -440,7 +443,7 @@ jobs:
       macos-executor
     steps:
       - restore_cache:
-          key: "aaa"
+          key: "aa"
       #- run:
       #    name: "Validate original files"
       #    command: |

@@ -25,6 +25,7 @@ workflows:
             requires:
               - "Build iOS Asset Bundles"
               - "Build Android Asset Bundles"
+              - "Workflow setup"
 
 executors:
   macos-executor:

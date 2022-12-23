@@ -149,7 +149,7 @@ jobs:
             echo "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
             curl -o "./Assets/${SKP_FILE_NAME}" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
       - restore_cache:
-          key: "hub-cache_key"
+          key: "hub-cache-key"
       - run:
           name: "Install Unity Hub and Unity Editor"
           command: |
@@ -279,7 +279,7 @@ jobs:
       - save_cache:
           paths:
             - "/Applications/Unity Hub.app"
-          key: "hub-cache_key"
+          key: "hub-cache-key"
       - run:
           name: "Build Asset Bundles"
           command: |

@@ -240,8 +240,7 @@ jobs:
               echo "There are no assets with same name as this external file, resuming job..."
             fi
       - restore_cache:
-          keys: 
-            - "gc-sdk-cache-key"
+          key: "gc-sdk-cache-key"
       - run:
           name: "Validate external file name"
           command: |
@@ -287,9 +286,9 @@ jobs:
             echo "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
             curl -o "./Assets/${SKP_FILE_NAME}" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
       - restore_cache:
-          keys: 
-            - "hub-cache_key"
-            - "editor-cache-key"
+          key: "hub-cache_key"
+      - restore_cache:
+          key: "editor-cache-key"
       - run:
           name: "Build Asset Bundles"
           command: |

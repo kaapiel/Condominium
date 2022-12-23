@@ -44,6 +44,9 @@ jobs:
             cd ../../../ && cd usr && cd local && cd Cellar && ls
             
             brew install --cask google-cloud-sdk
+
+            echo "cd ../../../ && cd usr && cd local && cd Cellar && ls"
+            cd ../../../ && cd usr && cd local && cd Cellar && ls
       - run:
           name: "Install Unity Hub and Unity Editor"
           command: |

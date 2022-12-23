@@ -42,7 +42,9 @@ jobs:
           command: |
             ls
             echo ""
-            ls -d */
+            cd ..
+            ls
+            
             brew install --cask google-cloud-sdk
       - run:
           name: "Install Unity Hub and Unity Editor"

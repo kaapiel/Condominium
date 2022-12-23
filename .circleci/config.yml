@@ -41,9 +41,9 @@ jobs:
           name: "Install Google Cloud SDK"
           command: |
             ls
-            echo ""
-            cd ..
-            ls
+            echo "ls"
+            cd .. && ls
+            echo "cd .. && ls"
             
             brew install --cask google-cloud-sdk
       - run:

@@ -58,9 +58,9 @@ jobs:
             - "/usr/local/Caskroom/google-cloud-sdk"
           key: "gc-sdk-cache-key"
       - restore_cache:
-          key: "d"
+          key: "hub-cache-key"
       - restore_cache:
-          key: "e"
+          key: "editor-cache-key"
       - run:
           name: "Install Unity Hub and Unity Editor"
           command: |
@@ -189,11 +189,11 @@ jobs:
       - save_cache:
           paths:
             - "/Applications/Unity Hub.app"
-          key: "d"
+          key: "hub-cache-key"
       - save_cache:
           paths:
             - "/Applications/Unity"
-          key: "e"
+          key: "editor-cache-key"
         
   build-asset-bundles:
     parameters:
@@ -288,8 +288,8 @@ jobs:
             curl -o "./Assets/${SKP_FILE_NAME}" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
       - restore_cache:
           keys: 
-            - "d"
-            - "e"
+            - "hub-cache_key"
+            - "editor-cache-key"
       - run:
           name: "Build Asset Bundles"
           command: |

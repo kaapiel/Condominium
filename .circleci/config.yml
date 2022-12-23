@@ -131,7 +131,7 @@ jobs:
               circleci-agent step halt
             fi
             
-            if [ $FILE_SIZE -ge 100000000 ];
+            if [ $FILE_SIZE -ge 200000000 ];
             then
               echo "The file size is greater than 100mb. Deleting the file."
               printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json

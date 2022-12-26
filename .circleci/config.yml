@@ -44,8 +44,8 @@ jobs:
       - run:
           name: Download FBX converter
           command: |
-            curl -L -o fbxconverter.zip "https://www.autodesk.com/content/dam/autodesk/www/adn/fbx/2019/fbx20194_fbxsdk_mac_2019.5.1.zip"
-            unzip fbxconverter.zip
+            curl -L -o "./fbxconverter.zip" "https://www.autodesk.com/content/dam/autodesk/www/adn/fbx/2019/fbx20194_fbxsdk_mac_2019.5.1.zip"
+            unzip "./fbxconverter.zip"
       - run:
           name: Download skp file and convert it to FBX
           command: |

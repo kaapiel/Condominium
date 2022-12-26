@@ -44,8 +44,8 @@ jobs:
       - run:
           name: Download FBX converter
           command: |
-            wget -O fbxconverter.pkg https://www.autodesk.com/fbx/2019/2019.0/mac/fbx2019.0_mac.pkg
-            sudo installer -pkg fbxconverter.pkg -target /
+            curl -o "./fbxconverter.pkg" "https://www.autodesk.com/fbx/2019/2019.0/mac/fbx2019.0_mac.pkg"
+            sudo installer -pkg "./fbxconverter.pkg" -target /
       - run:
           name: Download skp file
           command: |

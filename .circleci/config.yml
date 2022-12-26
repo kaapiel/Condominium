@@ -25,7 +25,6 @@ workflows:
             requires:
               - "Build iOS Asset Bundles"
               - "Build Android Asset Bundles"
-              - "Workflow setup"
 
 executors:
   macos-executor:
@@ -40,6 +39,31 @@ jobs:
     steps:
       - restore_cache:
           key: "gc-sdk-cache-key"
+      - restore_cache:
+          key: "fbx-converter-cache-key"
+      - run:
+          name: Download FBX converter
+          command: |
+            wget -O fbxconverter.pkg https://www.autodesk.com/fbx/2019/2019.0/mac/fbx2019.0_mac.pkg
+            sudo installer -pkg fbxconverter.pkg -target /
+      - run:
+          name: Download skp file
+          command: |
+            export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
+            export SKP_FILE_TOKEN=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.downloadTokens' | tr -d '"')
+            echo "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
+            curl -o "./Assets/${SKP_FILE_NAME}" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
+
+      - run:
+          name: Convert SKP to FBX
+          command: |
+            /Applications/Autodesk/FBX\ Converter/2021.0/FBX\ Converter.app/Contents/MacOS/fbxconverter \
+              -f \
+              -s \
+              -ofbx \
+              "./Assets/${SKP_FILE_NAME}" \
+              "./Assets/${SKP_FILE_NAME%.*}.fbx"
+            cd ./Assets && ls
       - run:
           name: "Install Google Cloud SDK"
           command: |

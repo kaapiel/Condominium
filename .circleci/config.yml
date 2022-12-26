@@ -44,14 +44,18 @@ jobs:
       - run:
           name: Download FBX converter
           command: |
-            brew install fbx-conv
+            curl -L -o fbxconverter.zip "https://www.autodesk.com/content/dam/autodesk/www/adn/fbx/2019/fbx20194_fbxsdk_mac_2019.5.1.zip"
+            unzip fbxconverter.zip
       - run:
-          name: Download skp file
+          name: Download skp file and convert it to FBX
           command: |
             export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
             export SKP_FILE_TOKEN=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.downloadTokens' | tr -d '"')
             echo "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
             curl -o "./Assets/${SKP_FILE_NAME}" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
+
+            export PATH=$PATH:$PWD/FBX/FBX SDK/2019.5.1/lib/clang/release
+            fbx-conv -b -f input_file.skp -o output_file.fbx
       - run:
           name: Convert SKP to FBX
           command: |

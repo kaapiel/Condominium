@@ -44,8 +44,7 @@ jobs:
       - run:
           name: Download FBX converter
           command: |
-            curl -o fbxconverter.pkg "https://www.autodesk.com/fbx/2019/2019.0/mac/fbx2019.0_mac.pkg"
-            sudo installer -pkg fbxconverter.pkg -target /
+            brew install fbx-conv
       - run:
           name: Download skp file
           command: |
@@ -53,16 +52,10 @@ jobs:
             export SKP_FILE_TOKEN=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.downloadTokens' | tr -d '"')
             echo "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
             curl -o "./Assets/${SKP_FILE_NAME}" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
-
       - run:
           name: Convert SKP to FBX
           command: |
-            /Applications/Autodesk/FBX\ Converter/2021.0/FBX\ Converter.app/Contents/MacOS/fbxconverter \
-              -f \
-              -s \
-              -ofbx \
-              "./Assets/${SKP_FILE_NAME}" \
-              "./Assets/${SKP_FILE_NAME%.*}.fbx"
+            fbx-conv "./Assets/${SKP_FILE_NAME}" "./Assets/${SKP_FILE_NAME%.*}.fbx"
             cd ./Assets && ls
       - run:
           name: "Install Google Cloud SDK"

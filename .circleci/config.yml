@@ -5,6 +5,27 @@ version: 2.1
 orbs:
   unity: game-ci/unity@1.3.0
 
+workflows:
+  generate-asset-bundle-workflow:
+      jobs:
+        - setup:
+            name: "Workflow setup"
+        - build-asset-bundles:
+            name: "Build Android Asset Bundles"
+            platform: "Android"
+            requires:
+              - "Workflow setup"
+        - build-asset-bundles:
+            name: "Build iOS Asset Bundles"
+            platform: "iOS"
+            requires:
+              - "Workflow setup"
+        - tear-down:
+            name: "Tear Down"
+            requires:
+              - "Build iOS Asset Bundles"
+              - "Build Android Asset Bundles"
+
 executors:
   macos-executor:
     macos:
@@ -12,6 +33,31 @@ executors:
     resource_class: medium
 
 jobs:
+  setup:
+    executor:
+      macos-executor
+    steps:
+      - restore_cache:
+          key: "gc-sdk-cache-key"
+      - run:
+          name: "Install Google Cloud SDK"
+          command: |
+            if [[ -d "/usr/local/Caskroom/google-cloud-sdk" ]];
+            then
+                echo "Google Cloud SDK is already installed. Skipping installation."
+            else
+              echo "Google cloud SDK is not installed. Installing it using brew..."
+              brew install google-cloud-sdk
+            fi
+      - save_cache:
+          paths:
+            - "/usr/local/bin/anthoscli"
+            - "/usr/local/bin/gcloud"
+            - "/usr/local/bin/bq"
+            - "/usr/local/bin/gsutil"
+            - "/usr/local/Caskroom/google-cloud-sdk"
+          key: "gc-sdk-cache-key"
+
   build-asset-bundles:
     parameters:
       platform:
@@ -56,11 +102,8 @@ jobs:
             else
               echo "There are no assets with same name as this external file, resuming job..."
             fi
-
-      - run:
-          name: "Install Google Cloud sdk"
-          command: |
-            brew install --cask google-cloud-sdk
+      - restore_cache:
+          key: "gc-sdk-cache-key"
       - run:
           name: "Validate external file name"
           command: |
@@ -88,7 +131,7 @@ jobs:
               circleci-agent step halt
             fi
             
-            if [ $FILE_SIZE -ge 100000000 ];
+            if [ $FILE_SIZE -ge 200000000 ];
             then
               echo "The file size is greater than 100mb. Deleting the file."
               printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
@@ -105,8 +148,10 @@ jobs:
             export SKP_FILE_TOKEN=$(curl -s "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}" | jq '.downloadTokens' | tr -d '"')
             echo "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
             curl -o "./Assets/${SKP_FILE_NAME}" "https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}?alt=media&token=${SKP_FILE_TOKEN}"
+      - restore_cache:
+          key: "hub-cache-key"
       - run:
-          name: "Prepare Env"
+          name: "Install Unity Hub and Unity Editor"
           command: |
             readonly unity_hub_path="/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"
             readonly unity_editor_path="/Applications/Unity/Hub/Editor/2021.3.1f1/Unity.app/Contents/MacOS/Unity"
@@ -231,6 +276,10 @@ jobs:
               -serial "$resolved_unity_serial" \
               -logfile /dev/stdout
             set +x
+      - save_cache:
+          paths:
+            - "/Applications/Unity Hub.app"
+          key: "hub-cache-key"
       - run:
           name: "Build Asset Bundles"
           command: |
@@ -261,6 +310,8 @@ jobs:
     executor:
       macos-executor
     steps:
+      - restore_cache:
+          key: "gc-sdk-cache-key"
       - run:
           name: "Validate original files"
           command: |
@@ -274,32 +325,12 @@ jobs:
               echo "There are files in the repository, resuming job..."
             fi
       - run:
-          name: "Install Google Cloud sdk"
-          command: |
-            brew install --cask google-cloud-sdk
-      - run:
             name: "Delete external file from firebase bucket"
             command: |
               echo "Deleting external file from firebase bucket"
               export SKP_FILE_NAME=$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-unity.appspot.com/o/' | jq '.items[0].name' | tr -d '"')
               printf "$GC_PRIVATE_KEY_ENCODED_UNITY" | base64 --decode >> ./service-account.json
               gcloud auth activate-service-account --key-file ./service-account.json
-              rm ./service-account.json
+              rm ./service-account.json  
               curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-unity.appspot.com/o/${SKP_FILE_NAME}"
-
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
-workflows:
-  generate-asset-bundle-workflow:
-      jobs:
-        - build-asset-bundles:
-            name: "Build Android Asset Bundles"
-            platform: "Android"
-        - build-asset-bundles:
-            name: "Build iOS Asset Bundles"
-            platform: "iOS"
-        - tear-down:
-            name: "Tear Down "
-            requires:
-              - "Build iOS Asset Bundles"
-              - "Build Android Asset Bundles"
+            when: always

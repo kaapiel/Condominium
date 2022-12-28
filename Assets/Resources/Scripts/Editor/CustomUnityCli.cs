@@ -15,7 +15,7 @@ public class CustomUnityCli : MonoBehaviour
 
         if (!platform_name.Equals("Android") && !platform_name.Equals("iOS"))
         {
-            Debug.Log("Platform name doesn't match. It must be Android or iOS. Found: " + platform_name);
+            Debug.Log("Platform name doesn't match. It must be Android or iOS. Platform provided: " + platform_name);
             return;
         }
 
@@ -33,11 +33,25 @@ public class CustomUnityCli : MonoBehaviour
         Debug.Log("Asset path retrieved: " + asset_path);
 
         Debug.Log("Extracting textures...");
-        if (!file_name.EndsWith(".unitypackage"))
+        if (!file_name.EndsWith(".skp") && !file_name.EndsWith(".fbx") && !file_name.EndsWith(".zip"))
         {
-            ModelImporter modelImporter = AssetImporter.GetAtPath(asset_path) as ModelImporter;
-            modelImporter.isReadable = true;
-            modelImporter.ExtractTextures("Assets/Textures/");
+            Debug.Log("The supported file formats are: skp, fbx and zip. Aborting job");
+            return;
+        }
+        else
+        {
+            if (file_name.EndsWith(".zip"))
+            {
+                Debug.Log("Extracting zip file...");
+                Debug.Log("Not yet implemented.");
+                return;
+            }
+            else
+            {
+                ModelImporter modelImporter = AssetImporter.GetAtPath(asset_path) as ModelImporter;
+                modelImporter.isReadable = true;
+                modelImporter.ExtractTextures("Assets/Textures/");
+            }
         }
         Debug.Log("Extracting textures finished");
 
@@ -57,13 +71,14 @@ public class CustomUnityCli : MonoBehaviour
             Debug.Log("Building Android asset bundle with BundleOptions NONE");
             BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", BuildAssetBundleOptions.None, BuildTarget.Android);
             Debug.Log("Android asset bundle built with BundleOption NONE");
-        } else if (platform_name.Equals("iOS"))
+        }
+        else if (platform_name.Equals("iOS"))
         {
             Debug.Log("Building iOS asset bundle with BundleOptions NONE");
             BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", BuildAssetBundleOptions.None, BuildTarget.iOS);
             Debug.Log("iOS asset bundle built with BundleOption NONE");
         }
-        
+
     }
 
     // Helper function for getting the command line arguments

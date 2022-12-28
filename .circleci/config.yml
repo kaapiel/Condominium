@@ -40,19 +40,19 @@ executors:
 jobs:
   setup:
     executor:
-      linux-executor
+      macos-executor
     steps:
-      #- restore_cache:
-      #    key: "gc-sdk-cache-key"
-      - run:
-          name: install brew
-          command: |
-            sudo apt-get install build-essential curl file git
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      - restore_cache:
+          key: "gc-sdk-cache-key"
+      #- run:
+      #    name: install brew
+      #    command: |
+      #      sudo apt-get install build-essential curl file git
+      #      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-            echo 'export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin/:$PATH"' >> $BASH_ENV
-            echo 'export MANPATH="/home/linuxbrew/.linuxbrew/share/man:$MANPATH"' >> $BASH_ENV
-            echo 'export INFOPATH="/home/linuxbrew/.linuxbrew/share/info:$INFOPARH"' >> $BASH_ENV
+      #      echo 'export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin/:$PATH"' >> $BASH_ENV
+      #      echo 'export MANPATH="/home/linuxbrew/.linuxbrew/share/man:$MANPATH"' >> $BASH_ENV
+      #      echo 'export INFOPATH="/home/linuxbrew/.linuxbrew/share/info:$INFOPARH"' >> $BASH_ENV
       - run:
           name: "Install Google Cloud SDK"
           command: |
@@ -78,7 +78,7 @@ jobs:
         type: string
         default: ""
     executor:
-      linux-executor
+      macos-executor
     steps:
       - run:
           name: "Validate firebase bucket"
@@ -322,7 +322,7 @@ jobs:
 
   tear-down:
     executor:
-      linux-executor
+      macos-executor
     steps:
       - restore_cache:
           key: "gc-sdk-cache-key"

@@ -31,11 +31,16 @@ executors:
     macos:
       xcode: 12.5.1
     resource_class: medium
+  linux-executor:
+    machine:
+      image: ubuntu-2004-202010-01
+      docker_layer_caching: true
+    resource_class: large
 
 jobs:
   setup:
     executor:
-      macos-executor
+      linux-executor
     steps:
       - restore_cache:
           key: "gc-sdk-cache-key"
@@ -64,7 +69,7 @@ jobs:
         type: string
         default: ""
     executor:
-      macos-executor
+      linux-executor
     steps:
       - run:
           name: "Validate firebase bucket"
@@ -308,7 +313,7 @@ jobs:
 
   tear-down:
     executor:
-      macos-executor
+      linux-executor
     steps:
       - restore_cache:
           key: "gc-sdk-cache-key"

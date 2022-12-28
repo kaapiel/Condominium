@@ -42,8 +42,8 @@ jobs:
     executor:
       linux-executor
     steps:
-      - restore_cache:
-          key: "gc-sdk-cache-key"
+      #- restore_cache:
+      #    key: "gc-sdk-cache-key"
       - run:
           name: "Install Google Cloud SDK"
           command: |

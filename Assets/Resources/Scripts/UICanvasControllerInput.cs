@@ -33,6 +33,7 @@ namespace StarterAssets
 
         public void VirtualExitInput()
         {
+            AssetBundle.UnloadAllAssetBundles(true);
             SceneManager.LoadScene("Menu", LoadSceneMode.Single);
         }
 

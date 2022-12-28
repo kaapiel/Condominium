@@ -52,7 +52,7 @@ jobs:
 
             echo 'export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin/:$PATH"' >> $BASH_ENV
             echo 'export MANPATH="/home/linuxbrew/.linuxbrew/share/man:$MANPATH"' >> $BASH_ENV
-            exho 'export INFOPATH="/home/linuxbrew/.linuxbrew/share/info:$INFOPARH"' >> $BASH_ENV
+            echo 'export INFOPATH="/home/linuxbrew/.linuxbrew/share/info:$INFOPARH"' >> $BASH_ENV
       - run:
           name: "Install Google Cloud SDK"
           command: |

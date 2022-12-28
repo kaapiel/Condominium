@@ -169,6 +169,42 @@ public class CondominiumCustomScripts : MonoBehaviour
         RemoveAllEmptyMeshColliders(Selection.activeGameObject.transform);
     }
 
+    [MenuItem("Condominium/Create MeshCollider on MeshFilter")]
+    static void CreateMeshCollider()
+    {
+        CreateMeshColliderOnMeshFilter(Selection.activeGameObject.transform);
+    }
+
+    [MenuItem("Condominium/Build Thumbnail from AssetBundle")]
+    static void BuildAssetBundleAndThumbnail()
+    {
+
+        //AssetBundle.UnloadAllAssetBundles(true);
+        //AssetBundle assetBundle = AssetBundle.LoadFromFile("Assets/StreamingAssets/dw06skp");
+
+        //GameObject asset = assetBundle.LoadAsset("assets/resources/models/buildings/dw06.skp") as GameObject;
+        GameObject asset = GameObject.Find("MainCamera");
+        Camera cam = asset.GetComponent<Camera>();
+
+        RenderTexture renderTexture = new RenderTexture(256, 256, 24);
+        cam.targetTexture = renderTexture;
+
+        //cam.fieldOfView = 60;
+        //cam.transform.position = new Vector3(0, 0, -10);
+        //cam.transform.rotation = Quaternion.Euler(30, 45, 0);
+
+        //cam.clearFlags = CameraClearFlags.SolidColor;
+        //cam.backgroundColor = new Color(0, 0, 0, 0);
+
+        cam.Render();
+
+        Texture2D texture = new Texture2D(renderTexture.width, renderTexture.height, TextureFormat.ARGB32, false);
+        texture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+
+        byte[] pngData = texture.EncodeToPNG();
+        File.WriteAllBytes("Assets/StreamingAssets/model.png", pngData);
+    }
+
     static void RemoveAllEmptyMeshColliders(Transform trans)
     {
         foreach (Transform child in trans)
@@ -203,12 +239,6 @@ public class CondominiumCustomScripts : MonoBehaviour
                 }
             }
         }
-    }
-
-    [MenuItem("Condominium/Create MeshCollider on MeshFilter")]
-    static void CreateMeshCollider()
-    {
-        CreateMeshColliderOnMeshFilter(Selection.activeGameObject.transform);
     }
 
     static void CreateMeshColliderOnMeshFilter(Transform trans)

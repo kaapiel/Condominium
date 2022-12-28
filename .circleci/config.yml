@@ -48,7 +48,7 @@ jobs:
           name: install brew
           command: |
             sudo apt-get install build-essential curl file git
-            sh -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       - run:
           name: "Install Google Cloud SDK"
           command: |

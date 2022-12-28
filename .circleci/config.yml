@@ -45,6 +45,15 @@ jobs:
       #- restore_cache:
       #    key: "gc-sdk-cache-key"
       - run:
+          name: install brew
+          command: |
+            sudo apt-get install build-essential curl file git
+            sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
+
+            echo 'export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin/:$PATH"' >> $BASH_ENC
+            echo 'export MANPATH="/home/linuxbrew/.linuxbrew/share/man:$MANPATH"' >> $BASH_ENV
+            exho 'export INFOPATH="/home/linuxbrew/.linuxbrew/share/info:$INFOPARH"' >> $BASH_ENV
+      - run:
           name: "Install Google Cloud SDK"
           command: |
             if [[ -d "/usr/local/Caskroom/google-cloud-sdk" ]];

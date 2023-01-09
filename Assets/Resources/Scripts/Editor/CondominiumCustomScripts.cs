@@ -14,6 +14,7 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using System.IO.Compression;
 
 public class CondominiumCustomScripts : MonoBehaviour
 {
@@ -21,7 +22,56 @@ public class CondominiumCustomScripts : MonoBehaviour
     static List<Transform> transforms_skp = new List<Transform>(); 
     static List<Transform> transforms = new List<Transform>();
 
-    [MenuItem("Condominium/Build AssetBundles")]
+    [MenuItem("Condominium/Extract File")]
+    static void ExtractFile()
+    {
+        string asset_path = "./SAMPLE_TheUpperVestibule.zip";
+        string file_without_extension = "SAMPLE_TheUpperVestibule";
+
+        ZipFile.ExtractToDirectory(asset_path, "./");
+
+        if (Directory.Exists("./" + file_without_extension))
+        {
+            Debug.Log("Initial folder exists");
+            if (Directory.GetFiles("./" + file_without_extension + "/", "*.gltf").Length == 0 ||
+                Directory.GetFiles("./" + file_without_extension + "/", "*.bin").Length == 0 ||
+                !Directory.Exists("./" + file_without_extension + "/" + "textures"))
+            {
+                Debug.Log("Wrong data structure. Expected to have gltf + bin + textures");
+                return;
+            }
+            else
+            {
+                Debug.Log("Folder contains gltf bin and textures!");
+                string gltf_file_path = Directory.GetFiles("./" + file_without_extension + "/", "*.gltf")[0];
+                File.Move(gltf_file_path, "./" + file_without_extension + "/" + file_without_extension + ".gltf");
+                asset_path = "./" + file_without_extension + "/" + file_without_extension + ".gltf";
+                file_without_extension = Path.GetFileNameWithoutExtension(asset_path);
+            }
+
+        }
+        else
+        {
+            Debug.Log("Initial folder doesn't exists");
+            if (Directory.GetFiles("./", "*.gltf").Length == 0 ||
+                Directory.GetFiles("./", "*.bin").Length == 0 ||
+                !Directory.Exists("./textures"))
+            {
+                Debug.Log("Wrong data structure. Expected to have gltf + bin + textures");
+                return;
+            }
+            else
+            {
+                Debug.Log("Folder contains gltf bin and textures!");
+                string gltf_file_path = Directory.GetFiles("./", "*.gltf")[0];
+                File.Move(gltf_file_path, "./" + file_without_extension + ".gltf");
+                asset_path = "./" + file_without_extension + ".gltf";
+                file_without_extension = Path.GetFileNameWithoutExtension(asset_path);
+            }
+        }
+    }
+
+        [MenuItem("Condominium/Build AssetBundles")]
     static void BuildAssetBundles()
     {
         //string fileName = "/Assets/Resources/Models/DW06_copy.skp";

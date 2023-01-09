@@ -295,7 +295,7 @@ namespace SlimUI.ModernMenu
 					MeshCollider m = trans.gameObject.AddComponent<MeshCollider>();
 					m.sharedMesh = ((MeshFilter)c).sharedMesh;
 					//m.convex = true;
-					//Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
+					//Rigidbody rb = c.gameObject.AddComponent<Rigidbody>();
 					//rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
 				}
 
@@ -313,7 +313,8 @@ namespace SlimUI.ModernMenu
 					child.name.Contains("Window", StringComparison.OrdinalIgnoreCase) ||
 					child.name.Contains("Animation", StringComparison.OrdinalIgnoreCase) ||
 					child.name.Contains("Water", StringComparison.OrdinalIgnoreCase) ||
-					child.name.Contains("Glass", StringComparison.OrdinalIgnoreCase))
+					child.name.Contains("Glass", StringComparison.OrdinalIgnoreCase) ||
+					child.name.Contains("Camera", StringComparison.OrdinalIgnoreCase))
 				{
 					continue;
 				}
@@ -328,6 +329,9 @@ namespace SlimUI.ModernMenu
 							DestroyImmediate(child.gameObject.GetComponent<MeshCollider>());
 							MeshCollider m = child.gameObject.AddComponent<MeshCollider>();
 							m.sharedMesh = ((MeshFilter)c).sharedMesh;
+							//m.convex = true;
+							//Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
+							//rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
 
 						}
 
@@ -349,6 +353,9 @@ namespace SlimUI.ModernMenu
 							DestroyImmediate(child.gameObject.GetComponent<MeshCollider>());
 							MeshCollider m = child.gameObject.AddComponent<MeshCollider>();
 							m.sharedMesh = ((MeshFilter)c).sharedMesh;
+							//m.convex = true;
+							//Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
+							//rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
 						}
 
 						if (c.GetType() == typeof(Camera))

@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.Formats.Fbx.Exporter;
+using System.IO.Compression;
+using System.IO;
 
 public class CustomUnityCli : MonoBehaviour
 {
@@ -19,7 +22,7 @@ public class CustomUnityCli : MonoBehaviour
             return;
         }
 
-        string file_without_extension = System.IO.Path.GetFileNameWithoutExtension(file_name);
+        string file_without_extension = Path.GetFileNameWithoutExtension(file_name);
         Debug.Log("External file found: " + file_without_extension);
 
         //Find prefab name and get its GUID
@@ -35,7 +38,7 @@ public class CustomUnityCli : MonoBehaviour
         Debug.Log("Extracting textures...");
         if (!file_name.EndsWith(".skp") && !file_name.EndsWith(".fbx") && !file_name.EndsWith(".zip"))
         {
-            Debug.Log("The supported file formats are: skp, fbx and zip. Aborting job");
+            Debug.Log("The supported file formats are: skp, fbx and zip (containing gltf, bin and texture folder). Aborting job");
             return;
         }
         else
@@ -43,8 +46,47 @@ public class CustomUnityCli : MonoBehaviour
             if (file_name.EndsWith(".zip"))
             {
                 Debug.Log("Extracting zip file...");
-                Debug.Log("Not yet implemented.");
-                return;
+                ZipFile.ExtractToDirectory(asset_path, "./");
+
+                if (Directory.Exists("./" + file_without_extension))
+                {
+                    Debug.Log("Initial folder exists");
+                    if (Directory.GetFiles("./" + file_without_extension + "/", "*.gltf").Length == 0 ||
+                        Directory.GetFiles("./" + file_without_extension + "/", "*.bin").Length == 0 ||
+                        !Directory.Exists("./" + file_without_extension + "/" + "textures"))
+                    {
+                        Debug.Log("Wrong data structure. Expected to have gltf + bin + textures");
+                        return;
+                    }
+                    else
+                    {
+                        Debug.Log("Folder contains gltf bin and textures!");
+                        string gltf_file_path = Directory.GetFiles("./" + file_without_extension + "/", "*.gltf")[0];
+                        File.Move(gltf_file_path, "./" + file_without_extension + "/" + file_without_extension + ".gltf");
+                        asset_path = "./" + file_without_extension + "/" + file_without_extension + ".gltf";
+                        file_without_extension = Path.GetFileNameWithoutExtension(asset_path);
+                    }
+
+                }
+                else
+                {
+                    Debug.Log("Initial folder doesn't exists");
+                    if (Directory.GetFiles("./", "*.gltf").Length == 0 ||
+                        Directory.GetFiles("./", "*.bin").Length == 0 ||
+                        !Directory.Exists("./textures"))
+                    {
+                        Debug.Log("Wrong data structure. Expected to have gltf + bin + textures");
+                        return;
+                    }
+                    else
+                    {
+                        Debug.Log("Folder contains gltf bin and textures!");
+                        string gltf_file_path = Directory.GetFiles("./", "*.gltf")[0];
+                        File.Move(gltf_file_path, "./" + file_without_extension + ".gltf");
+                        asset_path = "./" + file_without_extension + ".gltf";
+                        file_without_extension = Path.GetFileNameWithoutExtension(asset_path);
+                    }
+                }
             }
             else
             {
@@ -79,6 +121,11 @@ public class CustomUnityCli : MonoBehaviour
             Debug.Log("iOS asset bundle built with BundleOption NONE");
         }
 
+    }
+
+    static void FBXConverter()
+    {
+        ModelExporter.OnExport();
     }
 
     // Helper function for getting the command line arguments

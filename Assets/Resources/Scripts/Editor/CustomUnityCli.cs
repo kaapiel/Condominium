@@ -103,6 +103,8 @@ public class CustomUnityCli : MonoBehaviour
 
         //Set bundle name into prefab
         Debug.Log("Set asset bundle name and variant of " + file_without_extension);
+        guid = AssetDatabase.FindAssets(file_without_extension + ".gltf", null)[0];
+        asset_path = AssetDatabase.GUIDToAssetPath(guid);
         UnityEditor.AssetImporter.GetAtPath(asset_path).SetAssetBundleNameAndVariant(file_without_extension, "");
         Debug.Log("Asset bundle name and variant set!");
 

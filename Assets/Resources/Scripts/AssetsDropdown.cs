@@ -1,8 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class AssetsDropdown : MonoBehaviour
 {
@@ -11,6 +14,12 @@ public class AssetsDropdown : MonoBehaviour
 	List<TMP_Dropdown.OptionData> m_Messages = new List<TMP_Dropdown.OptionData>();
 	string selected_option;
 	GameObject asset;
+	Slider x_Slider;
+	Slider y_Slider;
+	Slider z_Slider;
+	Slider m_RotationSlider;
+	Slider m_ScaleSlider;
+	Button m_applyButton;
 
 	string baseUrl = "";
 
@@ -26,6 +35,14 @@ public class AssetsDropdown : MonoBehaviour
 		baseUrl = "https://firebasestorage.googleapis.com/v0/b/condominium-asetbundle-android.appspot.com/o/";
 #endif
 
+		x_Slider = GameObject.Find("X_Slider").GetComponent<Slider>();
+		y_Slider = GameObject.Find("Y_Slider").GetComponent<Slider>();
+		z_Slider = GameObject.Find("Z_Slider").GetComponent<Slider>();
+
+		m_RotationSlider = GameObject.Find("Rotation_Slider").GetComponent<Slider>();
+		m_ScaleSlider = GameObject.Find("Scale_Slider").GetComponent<Slider>();
+		m_applyButton = GameObject.Find("ApplyButton").GetComponent<Button>();
+
 		m_Dropdown = GetComponent<TMP_Dropdown>();
 		m_Dropdown.ClearOptions();
 
@@ -33,14 +50,18 @@ public class AssetsDropdown : MonoBehaviour
 		m_NewData.text = "";
 		m_Messages.Add(m_NewData);
 
+		m_Dropdown.onValueChanged.AddListener(delegate { StartCoroutine(DownloadAsset(m_Dropdown.options[m_Dropdown.value].text)); });
+		m_applyButton.onClick.AddListener(delegate { CreateMeshColliderOnMeshFilter(asset.transform); });
+
         StartCoroutine(DownloadAssetBundlesLists());
 	}
 
-    // Update is called once per frame
     void Update()
     {
-        
-    }
+		asset.transform.position = new Vector3(x_Slider.value, y_Slider.value, z_Slider.value);
+		asset.transform.rotation = Quaternion.Euler(0, m_RotationSlider.value, 0);
+		asset.transform.localScale = new Vector3(m_ScaleSlider.value, m_ScaleSlider.value, m_ScaleSlider.value);
+	}
 
 	IEnumerator DownloadAssetBundlesLists()
 	{
@@ -75,41 +96,39 @@ public class AssetsDropdown : MonoBehaviour
     {
 		using (UnityWebRequest wr = UnityWebRequest.Get(baseUrl + assetName))
         {
-			Debug.Log("Downloading asset bundle metadata: " + selected_option);
 			selected_option = assetName;
 			wr.SendWebRequest();
 
 			while (!wr.isDone)
 			{
-				Debug.Log("Done Downloading metadata");
 				yield return null;
 			}
 
 			if (wr.result == UnityWebRequest.Result.Success)
 			{
-				Debug.Log("Success downloading metadata");
 				DriveFileData jsonFileData = JsonUtility.FromJson<DriveFileData>(wr.downloadHandler.text);
 				string fileURL = baseUrl + assetName + "?alt=media&token=" + jsonFileData.downloadTokens;
 
-				Debug.Log("Downloading assetbundle binary file");
 				UnityWebRequest www = UnityWebRequestAssetBundle.GetAssetBundle(fileURL);
 				www.SendWebRequest();
 
 				while (!www.isDone)
 				{
-					Debug.Log("Done downloading assetbundle binary file");
 					yield return null;
 				}
 
 				if (www.result == UnityWebRequest.Result.Success)
 				{
-					Debug.Log("Success downloading assetbundle");
-					AssetBundle.UnloadAllAssetBundles(true);
-
-					asset = DownloadHandlerAssetBundle.GetContent(www).LoadAsset(assetName) as GameObject;
+					Debug.Log("Success downloading assetbundle: " + assetName);
+					GameObject assetBundle = DownloadHandlerAssetBundle.GetContent(www).LoadAsset(assetName) as GameObject;
                     GameObject camera = GameObject.Find("MainCamera");
-					asset.transform.position = new Vector3(0, 0, 0);
-					Instantiate(asset);
+					asset = Instantiate(assetBundle);
+
+					asset.transform.position = camera.transform.position + camera.transform.forward * 5;
+					
+					x_Slider.value = asset.transform.position.x;
+					y_Slider.value = 0;
+					z_Slider.value = asset.transform.position.z;
 				}
 			}
 		}
@@ -117,9 +136,128 @@ public class AssetsDropdown : MonoBehaviour
 		yield return null;
 	}
 
-	void DropdownValueChanged(TMP_Dropdown change)
+	private void CreateMeshColliderOnMeshFilter(Transform trans)
 	{
-		Debug.Log(change.value);
+		//This is the first object (parent)
+		Component[] comps = trans.GetComponents<Component>();
+		foreach (Component c in comps)
+		{
+			if (c.GetType() == typeof(MeshFilter))
+			{
+				DestroyImmediate(trans.gameObject.GetComponent<MeshCollider>());
+				MeshCollider m = trans.gameObject.AddComponent<MeshCollider>();
+				m.sharedMesh = ((MeshFilter)c).sharedMesh;
+				//m.convex = true;
+				//Rigidbody rb = c.gameObject.AddComponent<Rigidbody>();
+				//rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
+			}
+
+			if (c.GetType() == typeof(Camera))
+			{
+				Camera cam = c as Camera;
+				cam.enabled = false;
+			}
+		}
+
+		//This are all the children (sub gameobjects)
+		foreach (Transform child in trans)
+		{
+			if (child.name.Contains("Door", StringComparison.OrdinalIgnoreCase) ||
+				child.name.Contains("Window", StringComparison.OrdinalIgnoreCase) ||
+				child.name.Contains("Animation", StringComparison.OrdinalIgnoreCase) ||
+				child.name.Contains("Water", StringComparison.OrdinalIgnoreCase) ||
+				child.name.Contains("Glass", StringComparison.OrdinalIgnoreCase) ||
+				child.name.Contains("Camera", StringComparison.OrdinalIgnoreCase))
+			{
+				continue;
+			}
+
+			if (child.childCount > 0)
+			{
+				Component[] components = child.GetComponents<Component>();
+				foreach (Component c in components)
+				{
+					if (c.GetType() == typeof(MeshFilter))
+					{
+						DestroyImmediate(child.gameObject.GetComponent<MeshCollider>());
+						MeshCollider m = child.gameObject.AddComponent<MeshCollider>();
+						m.sharedMesh = ((MeshFilter)c).sharedMesh;
+						//m.convex = true;
+						//Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
+						//rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
+
+					}
+
+					if (c.GetType() == typeof(Camera))
+					{
+						Camera cam = c as Camera;
+						cam.enabled = false;
+					}
+				}
+				CreateMeshColliderOnMeshFilter(child);
+			}
+			else
+			{
+				Component[] components = child.GetComponents<Component>();
+				foreach (Component c in components)
+				{
+					if (c.GetType() == typeof(MeshFilter))
+					{
+						DestroyImmediate(child.gameObject.GetComponent<MeshCollider>());
+						MeshCollider m = child.gameObject.AddComponent<MeshCollider>();
+						m.sharedMesh = ((MeshFilter)c).sharedMesh;
+						//m.convex = true;
+						//Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
+						//rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
+					}
+
+					if (c.GetType() == typeof(Camera))
+					{
+						Camera cam = c as Camera;
+						cam.enabled = false;
+					}
+				}
+			}
+		}
+
+		GameObject.Find("ImportCanvas").active = false;
+		FindIncludingInactive("JoystickCanvas").active = true;
+	}
+
+	public static GameObject FindIncludingInactive(string name)
+	{
+		Scene scene = SceneManager.GetActiveScene();
+		if (!scene.isLoaded)
+		{
+			//no scene loaded
+			return null;
+		}
+
+		var game_objects = new List<GameObject>();
+		scene.GetRootGameObjects(game_objects);
+
+		foreach (GameObject obj in game_objects)
+		{
+			if (obj.transform.name == name) return obj;
+
+			GameObject found = FindInChildrenIncludingInactive(obj, name);
+			if (found) return found;
+		}
+
+		return null;
+	}
+
+	private static GameObject FindInChildrenIncludingInactive(GameObject go, string name)
+	{
+
+		for (int i = 0; i < go.transform.childCount; i++)
+		{
+			if (go.transform.GetChild(i).gameObject.name == name) return go.transform.GetChild(i).gameObject;
+			GameObject found = FindInChildrenIncludingInactive(go.transform.GetChild(i).gameObject, name);
+			if (found != null) return found;
+		}
+
+		return null;  //couldn't find crap
 	}
 
 	[System.Serializable]

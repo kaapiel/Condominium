@@ -31,6 +31,11 @@ executors:
     macos:
       xcode: 12.5.1
     resource_class: medium
+  linux-executor:
+    machine:
+      image: ubuntu-2004:current
+      docker_layer_caching: true
+    resource_class: large
 
 jobs:
   setup:
@@ -104,6 +109,16 @@ jobs:
             fi
       - restore_cache:
           key: "gc-sdk-cache-key"
+      - run:
+          name: "Install Google Cloud SDK"
+          command: |
+            if [[ -d "/usr/local/Caskroom/google-cloud-sdk" ]];
+            then
+                echo "Google Cloud SDK is already installed. Skipping installation."
+            else
+              echo "Google cloud SDK is not installed. Installing it using brew..."
+              brew install google-cloud-sdk
+            fi      
       - run:
           name: "Validate external file name"
           command: |
@@ -312,6 +327,16 @@ jobs:
     steps:
       - restore_cache:
           key: "gc-sdk-cache-key"
+      - run:
+          name: "Install Google Cloud SDK"
+          command: |
+            if [[ -d "/usr/local/Caskroom/google-cloud-sdk" ]];
+            then
+                echo "Google Cloud SDK is already installed. Skipping installation."
+            else
+              echo "Google cloud SDK is not installed. Installing it using brew..."
+              brew install google-cloud-sdk
+            fi      
       - run:
           name: "Validate original files"
           command: |

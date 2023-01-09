@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEditor;
-using UnityEditor.Formats.Fbx.Exporter;
 using System.IO.Compression;
 using System.IO;
 
@@ -123,12 +122,6 @@ public class CustomUnityCli : MonoBehaviour
 
     }
 
-    static void FBXConverter()
-    {
-        ModelExporter.OnExport();
-    }
-
-    // Helper function for getting the command line arguments
     private static string GetFileNameArg(string name)
     {
         var args = System.Environment.GetCommandLineArgs();

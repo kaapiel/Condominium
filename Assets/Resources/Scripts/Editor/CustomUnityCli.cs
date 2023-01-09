@@ -1,4 +1,4 @@
-using UnityEngine;
+wusing UnityEngine;
 using UnityEditor;
 using System.IO.Compression;
 using System.IO;
@@ -62,8 +62,11 @@ public class CustomUnityCli : MonoBehaviour
                         Debug.Log("Folder contains gltf bin and textures!");
                         string gltf_file_path = Directory.GetFiles("./" + file_without_extension + "/", "*.gltf")[0];
                         File.Move(gltf_file_path, "./" + file_without_extension + "/" + file_without_extension + ".gltf");
+                        Debug.Log("Renamed file from " + gltf_file_path + "to " + "./" + file_without_extension + "/" + file_without_extension + ".gltf");
                         asset_path = "./" + file_without_extension + "/" + file_without_extension + ".gltf";
                         file_without_extension = Path.GetFileNameWithoutExtension(asset_path);
+                        Debug.Log("Asset path: " + asset_path);
+                        Debug.Log("File name without extension: " + file_without_extension);
                     }
 
                 }
@@ -82,8 +85,11 @@ public class CustomUnityCli : MonoBehaviour
                         Debug.Log("Folder contains gltf bin and textures!");
                         string gltf_file_path = Directory.GetFiles("./", "*.gltf")[0];
                         File.Move(gltf_file_path, "./" + file_without_extension + ".gltf");
+                        Debug.Log("Renamed file from " + gltf_file_path + "to " + "./" + file_without_extension + "/" + file_without_extension + ".gltf");
                         asset_path = "./" + file_without_extension + ".gltf";
                         file_without_extension = Path.GetFileNameWithoutExtension(asset_path);
+                        Debug.Log("Asset path: " + asset_path);
+                        Debug.Log("File name without extension: " + file_without_extension);
                     }
                 }
             }

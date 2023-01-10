@@ -46,6 +46,7 @@ public class CustomUnityCli : MonoBehaviour
             {
                 Debug.Log("Extracting zip file...");
                 ZipFile.ExtractToDirectory(asset_path, "./");
+                File.Delete(asset_path);
 
                 if (Directory.Exists("./" + file_without_extension))
                 {

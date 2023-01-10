@@ -62,7 +62,7 @@ public class CustomUnityCli : MonoBehaviour
                         Debug.Log("Folder contains gltf bin and textures!");
                         string gltf_file_path = Directory.GetFiles("./" + file_without_extension + "/", "*.gltf")[0];
                         File.Move(gltf_file_path, "./" + file_without_extension + "/" + file_without_extension + ".gltf");
-                        Debug.Log("Renamed file from " + gltf_file_path + "to " + "./" + file_without_extension + "/" + file_without_extension + ".gltf");
+                        Debug.Log("Renamed file from " + gltf_file_path + " to " + "./" + file_without_extension + "/" + file_without_extension + ".gltf");
                         asset_path = "./" + file_without_extension + "/" + file_without_extension + ".gltf";
                         file_without_extension = Path.GetFileNameWithoutExtension(asset_path);
                         Debug.Log("Asset path: " + asset_path);
@@ -109,7 +109,12 @@ public class CustomUnityCli : MonoBehaviour
 
         //Set bundle name into prefab
         Debug.Log("Set asset bundle name and variant of " + file_without_extension);
-        guid = AssetDatabase.FindAssets(file_without_extension + ".gltf", null)[0];
+        string[] guids = AssetDatabase.FindAssets(file_without_extension, null);
+        foreach(string g in guids)
+        {
+            Debug.Log(g);
+            Debug.Log("\n");
+        }
         asset_path = AssetDatabase.GUIDToAssetPath(guid);
         UnityEditor.AssetImporter.GetAtPath(asset_path).SetAssetBundleNameAndVariant(file_without_extension, "");
         Debug.Log("Asset bundle name and variant set!");

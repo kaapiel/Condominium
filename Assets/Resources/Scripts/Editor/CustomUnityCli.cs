@@ -34,7 +34,6 @@ public class CustomUnityCli : MonoBehaviour
         string asset_path = AssetDatabase.GUIDToAssetPath(guid);
         Debug.Log("Asset path retrieved: " + asset_path);
 
-        Debug.Log("Extracting textures...");
         if (!file_name.EndsWith(".skp") && !file_name.EndsWith(".fbx") && !file_name.EndsWith(".zip"))
         {
             Debug.Log("The supported file formats are: skp, fbx and zip (containing gltf, bin and texture folder). Aborting job");
@@ -45,15 +44,22 @@ public class CustomUnityCli : MonoBehaviour
             if (file_name.EndsWith(".zip"))
             {
                 Debug.Log("Extracting zip file...");
-                ZipFile.ExtractToDirectory(asset_path, "./");
-                File.Delete(asset_path);
+                ZipFile.ExtractToDirectory(asset_path, "./Assets/");
 
-                if (Directory.Exists("./" + file_without_extension))
+                if (Directory.Exists("./Assets/__MACOSX/"))
+                {
+                    Directory.Delete("./Assets/__MACOSX/", true);
+                    File.Delete("./Assets/__MACOSX.meta");
+                }
+
+                AssetDatabase.DeleteAsset(asset_path);
+
+                if (Directory.Exists("./Assets/" + file_without_extension))
                 {
                     Debug.Log("Initial folder exists");
-                    if (Directory.GetFiles("./" + file_without_extension + "/", "*.gltf").Length == 0 ||
-                        Directory.GetFiles("./" + file_without_extension + "/", "*.bin").Length == 0 ||
-                        !Directory.Exists("./" + file_without_extension + "/" + "textures"))
+                    if (Directory.GetFiles("./Assets/" + file_without_extension + "/", "*.gltf").Length == 0 ||
+                        Directory.GetFiles("./Assets/" + file_without_extension + "/", "*.bin").Length == 0 ||
+                        !Directory.Exists("./Assets/" + file_without_extension + "/" + "textures"))
                     {
                         Debug.Log("Wrong data structure. Expected to have gltf + bin + textures");
                         return;
@@ -61,22 +67,22 @@ public class CustomUnityCli : MonoBehaviour
                     else
                     {
                         Debug.Log("Folder contains gltf bin and textures!");
-                        string gltf_file_path = Directory.GetFiles("./" + file_without_extension + "/", "*.gltf")[0];
-                        File.Move(gltf_file_path, "./" + file_without_extension + "/" + file_without_extension + ".gltf");
-                        Debug.Log("Renamed file from " + gltf_file_path + " to " + "./" + file_without_extension + "/" + file_without_extension + ".gltf");
-                        asset_path = "./" + file_without_extension + "/" + file_without_extension + ".gltf";
+                        string gltf_file_path = Directory.GetFiles("./Assets/" + file_without_extension + "/", "*.gltf")[0];
+                        File.Move(gltf_file_path, "./Assets/" + file_without_extension + "/" + file_without_extension + ".gltf");
+                        Debug.Log("Renamed file from " + gltf_file_path + " to " + "./Assets/" + file_without_extension + "/" + file_without_extension + ".gltf");
+                        asset_path = "./Assets/" + file_without_extension + "/" + file_without_extension + ".gltf";
                         file_without_extension = Path.GetFileNameWithoutExtension(asset_path);
+
                         Debug.Log("Asset path: " + asset_path);
                         Debug.Log("File name without extension: " + file_without_extension);
                     }
-
                 }
                 else
                 {
                     Debug.Log("Initial folder doesn't exists");
-                    if (Directory.GetFiles("./", "*.gltf").Length == 0 ||
-                        Directory.GetFiles("./", "*.bin").Length == 0 ||
-                        !Directory.Exists("./textures"))
+                    if (Directory.GetFiles("./Assets/", "*.gltf").Length == 0 ||
+                        Directory.GetFiles("./Assets/", "*.bin").Length == 0 ||
+                        !Directory.Exists("./Assets/textures"))
                     {
                         Debug.Log("Wrong data structure. Expected to have gltf + bin + textures");
                         return;
@@ -84,11 +90,12 @@ public class CustomUnityCli : MonoBehaviour
                     else
                     {
                         Debug.Log("Folder contains gltf bin and textures!");
-                        string gltf_file_path = Directory.GetFiles("./", "*.gltf")[0];
-                        File.Move(gltf_file_path, "./" + file_without_extension + ".gltf");
-                        Debug.Log("Renamed file from " + gltf_file_path + "to " + "./" + file_without_extension + "/" + file_without_extension + ".gltf");
-                        asset_path = "./" + file_without_extension + ".gltf";
+                        string gltf_file_path = Directory.GetFiles("./Assets/", "*.gltf")[0];
+                        File.Move(gltf_file_path, "./Assets/" + file_without_extension + ".gltf");
+                        Debug.Log("Renamed file from " + gltf_file_path + "to " + "./Assets/" + file_without_extension + "/" + file_without_extension + ".gltf");
+                        asset_path = "./Assets/" + file_without_extension + ".gltf";
                         file_without_extension = Path.GetFileNameWithoutExtension(asset_path);
+
                         Debug.Log("Asset path: " + asset_path);
                         Debug.Log("File name without extension: " + file_without_extension);
                     }
@@ -96,28 +103,29 @@ public class CustomUnityCli : MonoBehaviour
             }
             else
             {
+                Debug.Log("Extracting textures...");
                 ModelImporter modelImporter = AssetImporter.GetAtPath(asset_path) as ModelImporter;
                 modelImporter.isReadable = true;
                 modelImporter.ExtractTextures("Assets/Textures/");
+                Debug.Log("Extracting textures finished");
             }
         }
-        Debug.Log("Extracting textures finished");
 
         //Import asset into project
         Debug.Log("External file import started...");
         AssetDatabase.ImportAsset(asset_path);
+        AssetDatabase.Refresh();
         Debug.Log("External file import finished!");
 
         //Set bundle name into prefab
         Debug.Log("Set asset bundle name and variant of " + file_without_extension);
-        string[] guids = AssetDatabase.FindAssets(file_without_extension, null);
-        foreach(string g in guids)
-        {
-            Debug.Log(g);
-            Debug.Log("\n");
-        }
+        guid = AssetDatabase.FindAssets(file_without_extension, null)[0];
+
+        Debug.Log("New GUID: " + guid);
         asset_path = AssetDatabase.GUIDToAssetPath(guid);
+        Debug.Log(asset_path);
         UnityEditor.AssetImporter.GetAtPath(asset_path).SetAssetBundleNameAndVariant(file_without_extension, "");
+        AssetDatabase.Refresh();
         Debug.Log("Asset bundle name and variant set!");
 
         //Build iOS/Android asset bundles
@@ -133,7 +141,6 @@ public class CustomUnityCli : MonoBehaviour
             BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", BuildAssetBundleOptions.None, BuildTarget.iOS);
             Debug.Log("iOS asset bundle built with BundleOption NONE");
         }
-
     }
 
     private static string GetFileNameArg(string name)

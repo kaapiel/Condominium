@@ -82,7 +82,7 @@ jobs:
             done
 
             gcloud auth activate-service-account --key-file ./service-account-ios.json
-            rm ./service-account-android.json
+            rm ./service-account-ios.json
 
             for i in $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq '.items[].name')
             do

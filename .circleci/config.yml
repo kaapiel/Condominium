@@ -62,6 +62,37 @@ jobs:
             - "/usr/local/bin/gsutil"
             - "/usr/local/Caskroom/google-cloud-sdk"
           key: "gc-sdk-cache-key"
+      - run:
+          name: "Scanning ambiguous files"
+          command: |
+            printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE" | base64 --decode >> ./service-account-ios.json
+            printf "$GC_PRIVATE_KEY_ENCODED_ASSETBUNDLE_ANDROID" | base64 --decode >> ./service-account-android.json
+            
+            gcloud auth activate-service-account --key-file ./service-account-android.json
+            rm ./service-account-android.json
+            
+            for i in $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-asetbundle-android.appspot.com/o/' | jq '.items[].name')
+            do
+              if [[ ! "$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq '.items[]')[*]" =~ $i ]]
+              then
+                  echo "$i Assetbundle wasn't found in iOS Assetbundle list. To avoid different experiences through devices we are proceeding to delete it from Android Assetbundle list."
+                  EXPORT filename=printf $i | tr -d '"' | jq -sRr @uri
+                  curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-asetbundle-android.appspot.com/o/$filename"
+              fi
+            done
+
+            gcloud auth activate-service-account --key-file ./service-account-ios.json
+            rm ./service-account-android.json
+
+            for i in $(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq '.items[].name')
+            do
+              if [[ ! "$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-asetbundle-android.appspot.com/o/' | jq '.items[]')[*]" =~ $i ]]
+              then
+                  echo "$i Assetbundle wasn't found in Android Assetbundle list. To avoid different experiences through devices we are proceeding to delete it from iOS Assetbundle list."
+                  EXPORT filename=printf $i | tr -d '"' | jq -sRr @uri
+                  curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-assetbundles.appspot.com/o/$filename"
+              fi
+            done
 
   build-asset-bundles:
     parameters:

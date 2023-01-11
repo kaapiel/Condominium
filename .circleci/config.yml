@@ -30,7 +30,7 @@ executors:
   macos-executor:
     macos:
       xcode: 12.5.1
-    resource_class: medium
+    resource_class: large
   linux-executor:
     machine:
       image: ubuntu-2004:current
@@ -76,8 +76,8 @@ jobs:
               if [[ ! "$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-assetbundles.appspot.com/o/' | jq '.items[]')[*]" =~ $i ]]
               then
                   echo "$i Assetbundle wasn't found in iOS Assetbundle list. To avoid different experiences through devices we are proceeding to delete it from Android Assetbundle list."
-                  EXPORT filename=printf $i | tr -d '"' | jq -sRr @uri
-                  curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-asetbundle-android.appspot.com/o/$filename"
+                  export FILENAME=printf $i | tr -d '"' | jq -sRr @uri
+                  curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-asetbundle-android.appspot.com/o/$FILENAME"
               fi
             done
 
@@ -89,8 +89,8 @@ jobs:
               if [[ ! "$(curl -s 'https://firebasestorage.googleapis.com/v0/b/condominium-asetbundle-android.appspot.com/o/' | jq '.items[]')[*]" =~ $i ]]
               then
                   echo "$i Assetbundle wasn't found in Android Assetbundle list. To avoid different experiences through devices we are proceeding to delete it from iOS Assetbundle list."
-                  EXPORT filename=printf $i | tr -d '"' | jq -sRr @uri
-                  curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-assetbundles.appspot.com/o/$filename"
+                  export FILENAME=printf $i | tr -d '"' | jq -sRr @uri
+                  curl -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://storage.googleapis.com/storage/v1/b/condominium-assetbundles.appspot.com/o/$FILENAME"
               fi
             done
 

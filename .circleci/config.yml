@@ -30,7 +30,7 @@ executors:
   macos-executor:
     macos:
       xcode: 12.5.1
-    resource_class: medium
+    resource_class: medium+
   linux-executor:
     machine:
       image: ubuntu-2004:current

@@ -52,7 +52,7 @@ jobs:
                 echo "Google Cloud SDK is already installed. Skipping installation."
             else
               echo "Google cloud SDK is not installed. Installing it using brew..."
-              brew install google-cloud-sdk
+              brew install google-cloud-sdk@427.0.0
             fi
       - save_cache:
           paths:

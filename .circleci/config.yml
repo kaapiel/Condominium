@@ -42,6 +42,18 @@ jobs:
     executor:
       macos-executor
     steps:
+      - run:
+          name: "Temp"
+          command: |
+            brew install google-cloud-sdk@427.0.0
+      - save_cache:
+          paths:
+            - "/usr/local/bin/anthoscli"
+            - "/usr/local/bin/gcloud"
+            - "/usr/local/bin/bq"
+            - "/usr/local/bin/gsutil"
+            - "/usr/local/Caskroom/google-cloud-sdk"
+          key: "gc-sdk-cache-key"
       - restore_cache:
           key: "gc-sdk-cache-key"
       - run:
